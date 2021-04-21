@@ -24,6 +24,7 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
+from DISClib.ADT import orderedmap as om
 assert cf
 
 
@@ -37,7 +38,12 @@ operación solicitada
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
-    print("2- ")
+    print("2- Cargar información de eventos")
+    print("3- Consultar número de eventos en un rango para una característica de contenido")
+    print("4- Consultar canciones de fiesta")
+    print("5 - Consultar canciones para estudiar")
+    print("6 - Consultar número de canciones para un género")
+    print("0- Salir")
 
 catalog = None
 
@@ -46,12 +52,29 @@ Menu principal
 """
 while True:
     printMenu()
-    inputs = input('Seleccione una opción para continuar\n')
+    inputs = input('Seleccione una opción para continuar\n>')
+
     if int(inputs[0]) == 1:
-        print("Cargando información de los archivos ....")
+        print("\nInicializando....")
+        # cont es el controlador que se usará de acá en adelante
+        cont = controller.init()
 
     elif int(inputs[0]) == 2:
-        pass
+        catalog=controller.loadData(cont)
+        #arbol=catalog['events']
+        #print('Altura del árbol: '+str(om.height(arbol)))
+        #print('Elementos del árbol: '+str(om.size(arbol)))
+        #print(om.maxKey(arbol))
+        #print(om.minKey(arbol))
+        
+    elif int(inputs[0])==3:
+        minimo=float(input('Ingrese el valor mínimo del rango: '))
+        maximo=float(input('Ingrese el valor máximo del rango: '))
+        contenido=input('Ingrese la característica de contenido: ')
+        x=controller.req1(minimo,maximo,contenido.lower(),catalog)
+        print('\nAltura del árbol generado: '+str(x[2])+' || Número de nodos: '+str(x[3]))
+        print('Total de eventos de escucha: '+str(x[1])+' || Número de artistas escuchados: '+str(x[0])+'\n')
+        input('Presione enter para continuar')
 
     else:
         sys.exit(0)
