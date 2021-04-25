@@ -23,10 +23,15 @@
 import config as cf
 import model
 import csv
+import time
+import tracemalloc
+from datetime import datetime
+
 from DISClib.DataStructures import listiterator as it
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
 
 
 """
@@ -56,30 +61,91 @@ def loadData(catalog):
     for evento in input_file:
         model.addevent(catalog,evento)
 
+    """
     events2file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
     input2_file = csv.DictReader(open(events2file, encoding="utf-8"),delimiter=",")
     for evento in input2_file:
         model.addevent2(catalog,evento)
-
+    """
     return catalog
-    
+
 def req1(mayor,menor,content,catalog):
-    mapa=model.req1(content,catalog)
-    llaves=om.keys(mapa,mayor,menor)
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    lista_mapa = model.ListaPorContenido(mayor, menor, content, catalog)
+    #mapa_artistas = model.TablaHashPorArtistas(lista_filtrada)
+    artists = mp.size(lista_mapa[1])
+    events = lt.size(lista_mapa[0])
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return artists,events, delta_time, delta_memory
+
+def req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability):
+    None
+
+"""
+def req1(mayor,menor,content,catalog):
+    mapa=model.RBTporContenido(mayor,menor,content,catalog)
+    llaves=om.keys(mapa)
     i=it.newIterator(llaves)
-    artists=0
+    artists= om.newMap(omaptype="RBT")
     events=0
     altura=om.height(mapa)
     num=om.size(mapa)
     while it.hasNext(i):
         entry=om.get(mapa,it.next(i))
         valor=me.getValue(entry)
-        art=lt.size(valor['artists'])
-        artists+=art
+        art=valor["artists"]
+        artists+=lt.size(art)
         events+=valor['events']
     return artists,events,altura,num
-
+"""
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+# ======================================
+# Funciones para medir tiempo y memoria
+# ======================================
+
+
+def getTime():
+    """
+    devuelve el instante tiempo de procesamiento en milisegundos
+    """
+    return float(time.perf_counter()*1000)
+
+
+def getMemory():
+    """
+    toma una muestra de la memoria alocada en instante de tiempo
+    """
+    return tracemalloc.take_snapshot()
+
+
+def deltaMemory(start_memory, stop_memory):
+    """
+    calcula la diferencia en memoria alocada del programa entre dos
+    instantes de tiempo y devuelve el resultado en bytes (ej.: 2100.0 B)
+    """
+    memory_diff = stop_memory.compare_to(start_memory, "filename")
+    delta_memory = 0.0
+
+    # suma de las diferencias en uso de memoria
+    for stat in memory_diff:
+        delta_memory = delta_memory + stat.size_diff
+    # de Byte -> kByte
+    delta_memory = delta_memory/1024.0
+    return delta_memory

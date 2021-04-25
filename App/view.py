@@ -25,6 +25,7 @@ import sys
 import controller
 from DISClib.ADT import list as lt
 from DISClib.ADT import orderedmap as om
+from DISClib.ADT import map as mp
 assert cf
 
 
@@ -55,12 +56,35 @@ while True:
     inputs = input('Seleccione una opción para continuar\n>')
 
     if int(inputs[0]) == 1:
+        print("")
         print("\nInicializando....")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init()
 
     elif int(inputs[0]) == 2:
-        catalog=controller.loadData(cont)
+        catalog = controller.loadData(cont)
+        print("")
+        print("Total de registros de eventos de escucha cargados: " + str(lt.size(catalog["eventos"])))
+        print("Total de artistas unicos cargados: " + str(mp.size(catalog["artistas"])))
+        print("Total de pistas de audio únicas guardadas: " + str(mp.size(catalog["pistas"])))
+        print("Primeros 5 eventos de escucha cargados: ")
+        i = 1
+        while i <= 5:
+            elem = lt.getElement(catalog["eventos"], i)
+            print("|" + str(i) + "|" + " instrumentalness: " + str(elem["instrumentalness"]) + " liveness: " + str(elem["liveness"])+ " speechiness: " + str(elem["speechiness"]) + " danceability: " + str(elem["danceability"])+ " valence: " + str(elem["valence"]) + " loudness: " + str(elem["loudness"])+ " tempo: " + str(elem["tempo"]) + " acousticness: " + str(elem["acousticness"])+ " energy: " + str(elem["energy"]) + " mode: " + str(elem["mode"])+ " key: " + str(elem["key"]) + " artist_id: " + str(elem["artist_id"]) + " tweet_lang: " + str(elem["tweet_lang"]) + " track_id: " + str(elem["track_id"]) + " created_at: " + str(elem["created_at"]) + " lang: " + str(elem["lang"]) + " time_zone: " + str(elem["time_zone"]) + " user_id: " + str(elem["user_id"]) + " id: " + str(elem["id"]))
+            i += 1
+
+        print("")
+        print("Últimos 5 eventos de escucha cargados: " )
+
+        num = 1
+        ii = lt.size(catalog["eventos"])
+        while ii >=(lt.size(catalog["eventos"])-4):
+            elem = lt.getElement(catalog["eventos"], i)
+            print("|" + str(num) + "|" + " instrumentalness: " + str(elem["instrumentalness"]) + " liveness: " + str(elem["liveness"])+ " speechiness: " + str(elem["speechiness"]) + " danceability: " + str(elem["danceability"])+ " valence: " + str(elem["valence"]) + " loudness: " + str(elem["loudness"])+ " tempo: " + str(elem["tempo"]) + " acousticness: " + str(elem["acousticness"])+ " energy: " + str(elem["energy"]) + " mode: " + str(elem["mode"])+ " key: " + str(elem["key"]) + " artist_id: " + str(elem["artist_id"]) + " tweet_lang: " + str(elem["tweet_lang"]) + " track_id: " + str(elem["track_id"]) + " created_at: " + str(elem["created_at"]) + " lang: " + str(elem["lang"]) + " time_zone: " + str(elem["time_zone"]) + " user_id: " + str(elem["user_id"]) + " id: " + str(elem["id"]))
+            num += 1
+            ii -= 1
+
         #arbol=catalog['events']
         #print('Altura del árbol: '+str(om.height(arbol)))
         #print('Elementos del árbol: '+str(om.size(arbol)))
@@ -71,10 +95,18 @@ while True:
         minimo=float(input('Ingrese el valor mínimo del rango: '))
         maximo=float(input('Ingrese el valor máximo del rango: '))
         contenido=input('Ingrese la característica de contenido: ')
-        x=controller.req1(minimo,maximo,contenido.lower(),catalog)
-        print('\nAltura del árbol generado: '+str(x[2])+' || Número de nodos: '+str(x[3]))
-        print('Total de eventos de escucha: '+str(x[1])+' || Número de artistas escuchados: '+str(x[0])+'\n')
+        x=controller.req1(maximo,minimo,contenido.lower(),catalog)
+        print("Tiempo [ms]: "+f"{x[2]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[3]:.3f}")
+        print('Total de eventos de escuchados: '+str(x[1])+' || Número de artistas escuchados: '+str(x[0])+'\n')
         input('Presione enter para continuar')
+    
+    elif int(inputs[0]) == 4:
+        minimoEnergy=float(input('Ingrese el valor mínimo de Energy: '))
+        maximoEnergy=float(input('Ingrese el valor máximo de Energy: '))
+        minimoDanceability=float(input('Ingrese el valor mínimo de Danceability: '))
+        maximoDanceability=float(input('Ingrese el valor máximo de Danceability: '))
+        x = controller.req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability)
+
 
     else:
         sys.exit(0)
