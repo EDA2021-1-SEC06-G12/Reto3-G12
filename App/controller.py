@@ -25,6 +25,8 @@ import model
 import csv
 import time
 import tracemalloc
+import random
+
 from datetime import datetime
 
 from DISClib.DataStructures import listiterator as it
@@ -61,12 +63,18 @@ def loadData(catalog):
     for evento in input_file:
         model.addevent(catalog,evento)
 
-    """
-    events2file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
-    input2_file = csv.DictReader(open(events2file, encoding="utf-8"),delimiter=",")
+    lista = catalog["usertrackhashtagtimestamp"]
+    userTHT_file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
+    input2_file = csv.DictReader(open(userTHT_file, encoding="utf-8"),delimiter=",")
     for evento in input2_file:
-        model.addevent2(catalog,evento)
-    """
+        model.add_2(lista,evento)
+    
+    lista2 = catalog["sentiment_val"]
+    sentimenalval_file = cf.data_dir+'user_track_hashtag_timestamp-small.csv'
+    input3_file = csv.DictReader(open(sentimenalval_file, encoding="utf-8"),delimiter=",")
+    for evento in input2_file:
+        model.add_2(lista2,evento)
+
     return catalog
 
 def req1(mayor,menor,content,catalog):
@@ -77,7 +85,7 @@ def req1(mayor,menor,content,catalog):
     start_time = getTime()
     start_memory = getMemory()
 
-    lista_mapa = model.ListaPorContenido(mayor, menor, content, catalog)
+    lista_mapa = model.ListaPorContenido_TablaHashPorArtistas(mayor, menor, content, catalog)
     #mapa_artistas = model.TablaHashPorArtistas(lista_filtrada)
     artists = mp.size(lista_mapa[1])
     events = lt.size(lista_mapa[0])
@@ -91,8 +99,35 @@ def req1(mayor,menor,content,catalog):
 
     return artists,events, delta_time, delta_memory
 
-def req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability):
-    None
+def req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability,catalog):
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    lista = catalog["eventos"]
+    filtro_En = model.FiltrarPorRango(minimoEnergy, maximoEnergy, "energy", lista)
+    filtro_Da = model.FiltrarPorRango(minimoDanceability, maximoDanceability, "danceability", filtro_En)
+
+    mapa = model.TablaHashPorTrack(filtro_Da)
+    total = mp.size(mapa)
+
+    mi = random.randint(1,lt.size(filtro_Da))
+
+    aleatorios = lt.subList(filtro_Da, mi, 5)
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return total,aleatorios,delta_time, delta_memory
+
+
 
 """
 def req1(mayor,menor,content,catalog):

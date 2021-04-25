@@ -43,13 +43,16 @@ assert cf
 def newCatalog():
     """ 
     """
-    catalog = {'events': None,
+    catalog = {"usertrackhashtagtimestamp":None,
+               "sentiment_val":None,
                'eventos':None,
                "artistas":None,
                "pistas": None}
 
-    catalog['events'] = om.newMap(omaptype='RBT',
-                                      comparefunction=comparetupla)
+    catalog["usertrackhashtagtimestamp"] = lt.newList(datastructure="ARRAY_LIST")
+
+    catalog["sentiment_val"] = lt.newList(datastructure="ARRAY_LIST")
+
     catalog['eventos']=lt.newList(datastructure="ARRAY_LIST")
 
     catalog["artistas"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
@@ -58,6 +61,10 @@ def newCatalog():
     
     return catalog
 
+def add_2(lista,value):
+    lt.addLast(lista, value)
+
+
 def addevent(catalog,event):
     """
     """
@@ -65,17 +72,6 @@ def addevent(catalog,event):
     lt.addLast(lista,event)
     updateArtistas(catalog['artistas'], event)
     updatePistas(catalog["pistas"], event)
-
-def addevent2(catalog,event):
-    updatehtevent(catalog['events'],event)
-    return catalog
-
-    
-def newcontextentry(event,content):
-    entry={'valor':float(event[content]),'artists':None,'events':1}
-    entry['artists']=lt.newList(datastructure="ARRAY_LIST")
-    lt.addLast(entry['artists'],event['artist_id'])
-    return entry
 
 def newArtist(artist_id):
     entry = {"artist_id":None,"num_eventos":1}
@@ -102,7 +98,6 @@ def updateArtistas(mapa,event):
         mp.put(mapa,artist_id,entry)
 
 
-
 def updatePistas(mapa,event):
     """
     """
@@ -116,34 +111,7 @@ def updatePistas(mapa,event):
         entry = newPista(track_id)
         mp.put(mapa,track_id,entry)
     
-    
 
-def updateevent(mapa,event):
-    user=event['user_id']
-    track=event['track_id']
-    date=event['created_at']
-    tupla=user,track,date
-    entry=om.get(mapa,tupla)
-    if entry is None:
-        evententry=newevententry(event,user,track,date)
-        om.put(mapa,tupla,evententry)
-    else:
-        evententry=me.getValue(entry)
-    lt.addLast(evententry['events'],event)
-
-def updatehtevent(mapa,event):  
-    user=event['user_id']
-    track=event['track_id']
-    date=event['created_at']
-    tupla=user,track,date
-    entry=om.get(mapa,tupla)
-    
-        
-def newevententry(event,user,track,date):
-    entry={'tupla':None,'hashtag':None,'events':None}
-    entry['tuple']=user,track,date
-    entry['events']=lt.newList(datastructure="ARRAY_LIST")
-    return entry
 
 
 
@@ -151,6 +119,28 @@ def newevententry(event,user,track,date):
 # Funciones para agregar informacion al catalogo
 
 # Funciones para creacion de datos
+def FiltrarPorRango(menor,mayor,content,lista):
+    final = lt.newList(datastructure="ARRAY_LIST")
+    x = it.newIterator(lista)
+    while it.hasNext(x):
+        event = it.next(x)
+        valor = float(event[content])
+        if float(menor)<=valor<=float(mayor):
+            lt.addFirst(final, event)
+    return final
+
+def TablaHashPorTrack(lista):
+    mapa = mp.newMap(maptype="PROBING",loadfactor=0.5)
+    x = it.newIterator(lista)
+    while it.hasNext(x):
+        event = it.next(x)
+        track_id = event["track_id"]
+        mp.put(mapa,track_id,None)
+    
+    return mapa
+
+
+
 def ListaPorContenido_TablaHashPorArtistas(mayor,menor,content,catalog):
     """
     Retorna una lista filtrada por eventos en los cuales menor<=event[content]<=mayor
@@ -163,7 +153,6 @@ def ListaPorContenido_TablaHashPorArtistas(mayor,menor,content,catalog):
     while it.hasNext(x):
         event = it.next(x)
         valor = float(event[content])
-
         if float(menor)<=valor<=float(mayor):
             lt.addLast(lista, event)
             artista = event["artist_id"]

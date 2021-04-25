@@ -105,7 +105,18 @@ while True:
         maximoEnergy=float(input('Ingrese el valor máximo de Energy: '))
         minimoDanceability=float(input('Ingrese el valor mínimo de Danceability: '))
         maximoDanceability=float(input('Ingrese el valor máximo de Danceability: '))
-        x = controller.req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability)
+        x = controller.req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability,catalog)
+        print("Tiempo [ms]: "+f"{x[2]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[3]:.3f}")
+        print("Total de pistas únicas en eventos: " + str(x[0]))
+        print("")
+        print("Pistas aleatorias: ")
+        i = 1
+        while i <= lt.size(x[1]):
+            elem = lt.getElement(x[1], i)
+            print("Pista " + str(i) + " " + str(elem["track_id"]) + " con energy de " + str(elem["energy"]) + " y danceability de " + str(elem["danceability"]))
+            i +=1
+        print("")
+
 
 
     else:
