@@ -116,6 +116,24 @@ while True:
             print("Pista " + str(i) + " " + str(elem["track_id"]) + " con energy de " + str(elem["energy"]) + " y danceability de " + str(elem["danceability"]))
             i +=1
         print("")
+    elif int(inputs[0]) == 5:
+        minimoIn=float(input('Ingrese el valor mínimo de Instrumentalness: '))
+        maximoIn=float(input('Ingrese el valor máximo de Instrumentalness: '))
+        minimoTe=float(input('Ingrese el valor mínimo de Tempo: '))
+        maximoTe=float(input('Ingrese el valor máximo de Tempo: '))
+        x = controller.req3(minimoIn,maximoIn,minimoTe,maximoTe,catalog)
+        print("Tiempo [ms]: "+f"{x[2]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[3]:.3f}")
+        print("Total de pistas únicas en eventos: " + str(x[0]))
+        print("")
+        print("Pistas aleatorias: ")
+        i = 1
+    
+        while i <= 5:
+            elem = lt.getElement(x[1], i)
+            print("Pista " + str(i) + " " + str(elem["track_id"]) + " con energy de " + str(elem["energy"]) + " y danceability de " + str(elem["danceability"]))
+            i +=1
+        print("")
+
 
 
 

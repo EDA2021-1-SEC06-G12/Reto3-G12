@@ -116,7 +116,7 @@ def req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability,catalog
 
     mi = random.randint(1,lt.size(filtro_Da))
 
-    aleatorios = lt.subList(filtro_Da, mi, 5)
+    aleatorios = lt.subList(filtro_Da,mi,5)
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -126,6 +126,41 @@ def req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability,catalog
     delta_memory = deltaMemory(start_memory, stop_memory)
 
     return total,aleatorios,delta_time, delta_memory
+
+def req3(minimoIn,maximoIn,minimoTe,maximoTe,catalog):
+    """
+    """
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
+    lista = catalog["eventos"]
+    filtro_In = model.FiltrarPorRango(minimoIn, maximoIn, "instrumentalness", lista)
+    filtro_Te = model.FiltrarPorRango(minimoTe, maximoTe, "tempo", filtro_In)
+
+    mapa = model.TablaHashPorTrack(filtro_Te)
+    total = mp.size(mapa)
+    
+    aleatorios = lt.newList(datastructure="ARRAY_LIST")
+    i = 1
+    while i <= lt.size(filtro_Te):
+        elem = lt.getElement(filtro_Te, i)
+        lt.addLast(aleatorios, elem)
+        i += 1
+    
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return total,aleatorios,delta_time, delta_memory
+
+   
 
 
 
