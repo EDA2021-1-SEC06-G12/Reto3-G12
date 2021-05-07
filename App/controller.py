@@ -20,20 +20,16 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+from datetime import datetime
 import config as cf
 import model
 import csv
-import time
-import tracemalloc
-import random
-
-from datetime import datetime
-
 from DISClib.DataStructures import listiterator as it
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
-from DISClib.ADT import map as mp
+import tracemalloc
+import time
 
 
 """
@@ -63,17 +59,9 @@ def loadData(catalog):
     for evento in input_file:
         model.addevent(catalog,evento)
 
-    lista = catalog["usertrackhashtagtimestamp"]
-    userTHT_file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
-    input2_file = csv.DictReader(open(userTHT_file, encoding="utf-8"),delimiter=",")
-    for evento in input2_file:
-        model.add_2(lista,evento)
-    
-    lista2 = catalog["sentiment_val"]
-    sentimenalval_file = cf.data_dir+'user_track_hashtag_timestamp-small.csv'
-    input3_file = csv.DictReader(open(sentimenalval_file, encoding="utf-8"),delimiter=",")
-    for evento in input2_file:
-        model.add_2(lista2,evento)
+    events2file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
+    input2_file = csv.DictReader(open(events2file, encoding="utf-8"),delimiter=",")
+
 
     return catalog
 
@@ -85,81 +73,32 @@ def req1(mayor,menor,content,catalog):
     start_time = getTime()
     start_memory = getMemory()
 
-    lista_mapa = model.ListaPorContenido_TablaHashPorArtistas(mayor, menor, content, catalog)
-    #mapa_artistas = model.TablaHashPorArtistas(lista_filtrada)
-    artists = mp.size(lista_mapa[1])
-    events = lt.size(lista_mapa[0])
-
-    stop_memory = getMemory()
-    stop_time = getTime()
-    tracemalloc.stop()
-
-    delta_time = stop_time - start_time
-    delta_memory = deltaMemory(start_memory, stop_memory)
-
-    return artists,events, delta_time, delta_memory
-
-def req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability,catalog):
-    delta_time = -1.0
-    delta_memory = -1.0
-
-    tracemalloc.start()
-    start_time = getTime()
-    start_memory = getMemory()
-
-    lista = catalog["eventos"]
-    filtro_En = model.FiltrarPorRango(minimoEnergy, maximoEnergy, "energy", lista)
-    filtro_Da = model.FiltrarPorRango(minimoDanceability, maximoDanceability, "danceability", filtro_En)
-
-    mapa = model.TablaHashPorTrack(filtro_Da)
-    total = mp.size(mapa)
-
-    mi = random.randint(1,lt.size(filtro_Da))
-
-    aleatorios = lt.subList(filtro_Da, mi, 5)
-
-    stop_memory = getMemory()
-    stop_time = getTime()
-    tracemalloc.stop()
-
-    delta_time = stop_time - start_time
-    delta_memory = deltaMemory(start_memory, stop_memory)
-
-    return total,aleatorios,delta_time, delta_memory
-
-
-
-"""
-def req1(mayor,menor,content,catalog):
-    mapa=model.RBTporContenido(mayor,menor,content,catalog)
-    llaves=om.keys(mapa)
+    mapa=model.req1(content,catalog)
+    llaves=om.keys(mapa,mayor,menor)
     i=it.newIterator(llaves)
-    artists= om.newMap(omaptype="RBT")
+    artists=0
     events=0
     altura=om.height(mapa)
     num=om.size(mapa)
     while it.hasNext(i):
         entry=om.get(mapa,it.next(i))
         valor=me.getValue(entry)
-        art=valor["artists"]
-        artists+=lt.size(art)
+        art=lt.size(valor['artists'])
+        artists+=art
         events+=valor['events']
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    
+    print(delta_time, delta_memory)
     return artists,events,altura,num
-"""
-
-# Funciones de ordenamiento
-
-# Funciones de consulta sobre el catálogo
-
-# ======================================
-# Funciones para medir tiempo y memoria
-# ======================================
-
 
 def getTime():
-    """
-    devuelve el instante tiempo de procesamiento en milisegundos
-    """
     return float(time.perf_counter()*1000)
 
 
