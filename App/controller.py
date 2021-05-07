@@ -26,6 +26,7 @@ import model
 import csv
 from DISClib.DataStructures import listiterator as it
 from DISClib.ADT import orderedmap as om
+from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
 import tracemalloc
@@ -54,49 +55,55 @@ def loadData(catalog):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    eventsfile=cf.data_dir + 'context_content_features-small.csv'
-    input_file = csv.DictReader(open(eventsfile, encoding="utf-8"),delimiter=",")
-    for evento in input_file:
-        model.addevent(catalog,evento)
-
     events2file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
     input2_file = csv.DictReader(open(events2file, encoding="utf-8"),delimiter=",")
+    mapa=mp.newMap()
+    for event in input2_file:
+        llave=(event['track_id'],event['user_id'],event['created_at'])
+        if mp.contains(mapa,llave):
+            pareja=mp.get(mapa,llave)
+            lista=me.getValue(pareja)
+            lt.addLast(lista,event['hashtag'])
+        else:
+            lista=lt.newList()
+            lt.addLast(lista,event['hashtag'])
+            mp.put(mapa,llave,lista)
 
-
+    eventsfile=cf.data_dir + 'context_content_features-small.csv'
+    input_file = csv.DictReader(open(eventsfile, encoding="utf-8"),delimiter=",")
+    for event in input_file:
+        llave=(event['track_id'],event['user_id'],event['created_at'])
+        if mp.contains(mapa,llave):
+            pareja=mp.get(mapa,llave)
+            hashtags=me.getValue(pareja)
+            event['hashtags']=hashtags
+        else:
+            event['hashtags']=None
+        model.addevent(catalog,event)
+        
     return catalog
 
-def req1(mayor,menor,content,catalog):
-    delta_time = -1.0
-    delta_memory = -1.0
+def req1(menor,mayor,feature,catalog):
+    events=model.numevents(om.values(catalog[feature],menor,mayor))
+    artists=model.artists(om.values(catalog[feature],menor,mayor))
+    print('\n'+feature+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(events)+'\nTotal of unique artists: '+str(artists))
 
-    tracemalloc.start()
-    start_time = getTime()
-    start_memory = getMemory()
 
-    mapa=model.req1(content,catalog)
-    llaves=om.keys(mapa,mayor,menor)
-    i=it.newIterator(llaves)
-    artists=0
-    events=0
-    altura=om.height(mapa)
-    num=om.size(mapa)
+def r2(catalog,f1,f2,min1,max1,min2,max2):
+    keys1=om.values(catalog[f1],min1,max1)
+    keys2=om.values(catalog[f2],min2,max2)
+    lista1=model.listaconlistas(keys1)
+    final=model.dosfeatures(keys2,lista1)
+    print('\nEnergy is between '+str(min1)+' and '+str(max1)+'\nDanceability is between '+str(min2)+' and '+str(max2)+'\nTotal of unique tracks in events: '+str(final)+'\n')
+    random=model.random5(catalog,f1,f2,min1,max1,min2,max2)
+    i=it.newIterator(random)
+    n=0
+    print('--- Unique track_id ---')
     while it.hasNext(i):
-        entry=om.get(mapa,it.next(i))
-        valor=me.getValue(entry)
-        art=lt.size(valor['artists'])
-        artists+=art
-        events+=valor['events']
-
-    stop_memory = getMemory()
-    stop_time = getTime()
-    tracemalloc.stop()
-
-    delta_time = stop_time - start_time
-    delta_memory = deltaMemory(start_memory, stop_memory)
-
-    
-    print(delta_time, delta_memory)
-    return artists,events,altura,num
+        event=it.next(i)
+        n+=1
+        print('Track '+str(n)+': '+ event[0]+' with energy of '+str(event[1])+' and danceability of '+str(event[2]))
+    print('\n')
 
 def getTime():
     return float(time.perf_counter()*1000)

@@ -70,23 +70,12 @@ while True:
     elif int(inputs[0])==3:
         minimo=float(input('Ingrese el valor mínimo del rango: '))
         maximo=float(input('Ingrese el valor máximo del rango: '))
-        contenido=input('Ingrese la característica de contenido: ')
-        x=controller.req1(minimo,maximo,contenido.lower(),catalog)
-        print('\nAltura del árbol generado: '+str(x[2])+' || Número de nodos: '+str(x[3]))
-        print('Total de eventos de escucha: '+str(x[1])+' || Número de artistas escuchados: '+str(x[0])+'\n')
-        input('Presione enter para continuar')
+        feature=input('Ingrese la característica de contenido: ')
+        print(controller.req1(minimo,maximo,feature.lower(),catalog))
 
     elif int(inputs[0])==4:
-        print(model.requ2(catalog,'energy','danceability',0.50,0.75,0.75,1.00))
+        controller.r2(catalog,'energy','danceability',0.50,0.75,0.75,1.00)
 
-    elif int(inputs[0])==8:
-        x=om.newMap()
-        om.put(x,1,'no')
-        om.put(x,2,'si')
-        m=om.values(x,0,3)
-        i=it.newIterator(m)
-        x=om.get(x,1)
-        print(me.getValue(x))
         
     else:
         sys.exit(0)
