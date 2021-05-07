@@ -74,9 +74,12 @@ while True:
         print(controller.req1(minimo,maximo,feature.lower(),catalog))
 
     elif int(inputs[0])==4:
-        controller.r2(catalog,'energy','danceability',0.50,0.75,0.75,1.00)
+        minenergy=int(input('Valor inferior energy: '))
+        maxenergy=int(input('Valor superior energy: '))
+        mindance=int(input('Valor inferior danceability:'))
+        maxdance=int(input('Valor superior danceability:'))
+        controller.r2(catalog,minenergy,maxenergy,mindance,maxdance)
 
-        
     else:
         sys.exit(0)
 sys.exit(0)

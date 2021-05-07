@@ -80,7 +80,7 @@ def loadData(catalog):
         else:
             event['hashtags']=None
         model.addevent(catalog,event)
-        
+
     return catalog
 
 def req1(menor,mayor,feature,catalog):
@@ -89,13 +89,13 @@ def req1(menor,mayor,feature,catalog):
     print('\n'+feature+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(events)+'\nTotal of unique artists: '+str(artists))
 
 
-def r2(catalog,f1,f2,min1,max1,min2,max2):
-    keys1=om.values(catalog[f1],min1,max1)
-    keys2=om.values(catalog[f2],min2,max2)
+def r2(catalog,min1,max1,min2,max2):
+    keys1=om.values(catalog['energy'],min1,max1)
+    keys2=om.values(catalog['danceability'],min2,max2)
     lista1=model.listaconlistas(keys1)
     final=model.dosfeatures(keys2,lista1)
     print('\nEnergy is between '+str(min1)+' and '+str(max1)+'\nDanceability is between '+str(min2)+' and '+str(max2)+'\nTotal of unique tracks in events: '+str(final)+'\n')
-    random=model.random5(catalog,f1,f2,min1,max1,min2,max2)
+    random=model.random5(catalog,'energy','danceability',min1,max1,min2,max2)
     i=it.newIterator(random)
     n=0
     print('--- Unique track_id ---')
