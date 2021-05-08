@@ -79,6 +79,22 @@ while True:
         mindance=int(input('Valor inferior danceability:'))
         maxdance=int(input('Valor superior danceability:'))
         controller.r2(catalog,minenergy,maxenergy,mindance,maxdance)
+    
+    elif int(inputs[0])==9:
+        x=int(input('¿Desea conocer información sobre géneros ya existentes? [0: sí // 1: no]: '))
+        if x==0:
+            genres=input('¿Cuáles? [escríbalos separados por una coma y espacio. Ej: reggae, hip-hop]: ')
+            lista=(genres.lower()).split(', ')
+            for genre in lista:
+                controller.req4(catalog,genre,None,None)
+            print('\n')
+        y=int(input('¿Desea conocer información sobre un género no existente? [0: sí // 1: no]: '))
+        if y==0:
+            name=input('Ingrese el nombre del nuevo género: ')
+            minim=int(input('Ingrese el valor mínimo de tempo: '))
+            maxim=int(input('Ingrese el valor máximo de tempo: '))
+            controller.req4(catalog,name,minim,maxim)
+            print('\n')
 
     else:
         sys.exit(0)

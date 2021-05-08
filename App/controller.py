@@ -85,7 +85,7 @@ def loadData(catalog):
 
 def req1(menor,mayor,feature,catalog):
     events=model.numevents(om.values(catalog[feature],menor,mayor))
-    artists=model.artists(om.values(catalog[feature],menor,mayor))
+    artists=(model.artists(om.values(catalog[feature],menor,mayor)))[0]
     print('\n'+feature+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(events)+'\nTotal of unique artists: '+str(artists))
 
 
@@ -104,6 +104,52 @@ def r2(catalog,min1,max1,min2,max2):
         n+=1
         print('Track '+str(n)+': '+ event[0]+' with energy of '+str(event[1])+' and danceability of '+str(event[2]))
     print('\n')
+
+
+def req4(catalog,genre,minimo,maximo):
+    if minimo==None:
+        if genre=='reggae':
+            menor=60
+            mayor=90
+        elif genre=='down-tempo':
+            menor=70
+            mayor=100
+        elif genre=='chill-out':
+            menor=90
+            mayor=120
+        elif genre=='hip-hop':
+            menor=85
+            mayor=112
+        elif genre=='jazz and funk':
+            menor=120
+            mayor=125
+        elif genre=='pop':
+            menor=100
+            mayor=130
+        elif genre=='r&b':
+            menor=60
+            mayor=80
+        elif genre=='rock':
+            menor=100
+            mayor=140
+        elif genre=='metal':
+            menor=100
+            mayor=160
+    else:
+        menor=minimo
+        mayor=maximo
+
+    eventos=model.numevents(om.values(catalog['tempo'],menor,mayor))
+    y=model.artists(om.values(catalog['tempo'],menor,mayor))
+    numartists=y[0]
+    listartists=y[1]
+    print('\n======= '+genre.upper()+' ========'+'\nFor '+genre+' the tempo is between '+str(menor)+' and '+str(mayor)+'\n'+genre+' reproductions: '+str(eventos)+' with '+str(numartists)+' different artists'+'\n\n---- Some artists for '+genre+' -----\n')
+    i=it.newIterator(listartists)
+    n=1
+    while it.hasNext(i):
+        artist=it.next(i)
+        print('Artist '+str(n)+': '+artist)
+        n+=1
 
 def getTime():
     return float(time.perf_counter()*1000)

@@ -154,6 +154,7 @@ def numevents(lista):
     return final
 
 def artists(lista):
+    lfinal=lt.newList()
     entry1=lt.firstElement(lista)
     final=entry1['artists']
     lt.deleteElement(lista,1)
@@ -166,8 +167,25 @@ def artists(lista):
             artist=it.next(ite)
             if lt.isPresent(final,artist)==0:
                 lt.addLast(final,artist)
-    return lt.size(final)
+    i=1
+    while i<10:
+        lt.addLast(lfinal,lt.getElement(final,i))
+        i+=1
+    return lt.size(final),lfinal
 
+def tenartists(lista):
+    final=lt.newList()
+    n=0
+    i=it.newIterator(lista)
+    while it.hasNext(i) and n<10:
+        entry=it.next(i)
+        artists=entry['artists']
+        ite=it.newIterator(artists)
+        while it.hasNext(ite) and n<10:
+            artist=it.next(ite)
+            lt.addLast(final,artist)
+            n+=1
+    return final
 
 # Funciones para agregar informacion al catalogo
 # Funciones utilizadas para comparar elementos dentro de una lista
