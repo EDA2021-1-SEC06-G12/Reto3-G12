@@ -22,6 +22,7 @@
 
 import config as cf
 import sys
+import datetime
 import controller
 from DISClib.ADT import list as lt
 from DISClib.ADT import orderedmap as om
@@ -95,6 +96,13 @@ while True:
             maxim=int(input('Ingrese el valor máximo de tempo: '))
             controller.req4(catalog,name,minim,maxim)
             print('\n')
+
+    elif int(inputs[0])==9:
+        lista=lt.newList()
+        lt.addLast(1)
+        l2=lt.newList()
+        lt.addLast(l2)
+        
 
     else:
         sys.exit(0)

@@ -55,10 +55,10 @@ def loadData(catalog):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    events2file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
-    input2_file = csv.DictReader(open(events2file, encoding="utf-8"),delimiter=",")
+    file1=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
+    input_file1 = csv.DictReader(open(file1, encoding="utf-8"),delimiter=",")
     mapa=mp.newMap()
-    for event in input2_file:
+    for event in input_file1:
         llave=(event['track_id'],event['user_id'],event['created_at'])
         if mp.contains(mapa,llave):
             pareja=mp.get(mapa,llave)
@@ -69,9 +69,9 @@ def loadData(catalog):
             lt.addLast(lista,event['hashtag'])
             mp.put(mapa,llave,lista)
 
-    eventsfile=cf.data_dir + 'context_content_features-small.csv'
-    input_file = csv.DictReader(open(eventsfile, encoding="utf-8"),delimiter=",")
-    for event in input_file:
+    file2=cf.data_dir + 'context_content_features-small.csv'
+    input_file2 = csv.DictReader(open(file2, encoding="utf-8"),delimiter=",")
+    for event in input_file2:
         llave=(event['track_id'],event['user_id'],event['created_at'])
         if mp.contains(mapa,llave):
             pareja=mp.get(mapa,llave)
@@ -80,6 +80,12 @@ def loadData(catalog):
         else:
             event['hashtags']=None
         model.addevent(catalog,event)
+
+
+    file3=cf.data_dir+'sentiment_values.csv'
+    input_file3=csv.DictReader(open(file3, encoding="utf-8"),delimiter=",")
+    for hashtag in input_file3:
+        print(hashtag)
 
     return catalog
 

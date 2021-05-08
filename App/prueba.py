@@ -30,4 +30,11 @@ for event in input_file:
         event['hashtags']=hashtags
     else:
         event['hashtags']=None
-    model.addevent(event)
+
+
+file3=cf.data_dir+'sentiment_values.csv'
+input_file3=csv.DictReader(open(file3, encoding="utf-8"),delimiter=",")
+mapa=om.newMap()
+for hashtag in input_file3:
+    entry=hashtag['']
+    om.put()

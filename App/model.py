@@ -55,6 +55,7 @@ def newCatalog():
     catalog['liveness']=om.newMap()
     catalog['speechiness']=om.newMap()
     catalog['valence']=om.newMap()
+    catalog['time']=om.newMap()
 
     return catalog
 
@@ -69,7 +70,30 @@ def addevent(catalog,event):
     addtomap(catalog['speechiness'],None,event['artist_id'],float(event['speechiness']),0)
     addtomap(catalog['valence'],None,event['artist_id'],float(event['valence']),0)
 
+
+def addtotime(catalog,event):
+    mapa=catalog['time']
+    createdat=event['created_at']
+    info=datetime.datetime.strptime(createdat, '%Y-%m-%d %H:%M:%S')
+    time=info.time()
+    if event['hashtags']!=None:
+        if om.contains(mapa,time):
+            pareja=om.get(mapa,time)
+            entry=me.getValue(pareja)
+            tempos=entry['tempos']
+            lt.addLast(tempos,event['tempo'])
+        else:
+            entry=newentrytime(time,event['tempo'])
+            om.put(mapa,time,entry)
+
+def newentrytime(time,tempo):
+    genres=genrebytempo(tempo)
+
     
+    entry={'time':time,'tempos':lt.newList()}
+    lt.addLast(entry['tempos'],tempo)
+    return entry
+
 def addtomap(mapa,track,artist,llave,x):
     if om.contains(mapa,llave):
         pareja=om.get(mapa,llave)
@@ -186,6 +210,31 @@ def tenartists(lista):
             lt.addLast(final,artist)
             n+=1
     return final
+
+
+def genrebytempo(num):
+    genres=lt.newList()
+    if num>=100 and num<=160:
+        lt.addLast(genres,'metal')
+        if num>=110 and num<=140:
+            lt.addLast(genres,'rock')
+            if num>=120 and num<=125:
+                lt.addLast(genres, 'jazz and funk')
+    if num>=100 and num<=130:
+        lt.addLast(genres,'pop')
+    if num>=85 and num<=115:
+        lt.addLast(genres,'hip-hop')
+    if num>=90 and num<=120:
+        lt.addLast(genres,'chill-out')
+    if num>=70 and num<=110:
+        lt.addLast(genres,'down-tempo')
+    if num>=60 and num<=90:
+        lt.addLast(genres,'reggae')
+        if num>=60 and num<=80:
+            lt.addLast(genres,'r&b')
+    return genres
+
+    
 
 # Funciones para agregar informacion al catalogo
 # Funciones utilizadas para comparar elementos dentro de una lista
