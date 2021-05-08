@@ -175,21 +175,15 @@ def req4(catalog,genre,minimo,maximo):
 
 
 def req5(catalog,minim,maxim):
-    x=om.values(catalog['time'],minim,maxim)
-    entry=(lt.firstElement(x))
-    genres=entry['genres']
-    promedios=entry['promedios']
-    print(genres)
-    print(promedios)
-    i=1
-    while i<=lt.size(genres):
-        gens=(lt.getElement(genres,i))
-        print(lt.size(gens))
-        i+=1
-"""        while ite<=lt.size(gens):
-            print(lt.getElement(gens,ite))
-            print(lt.getElement(poms,ite))
-            ite+=1"""
+    lista=om.values(catalog['time'],minim,maxim)
+    mapa=(model.req5(catalog,lista))
+    x=(mp.keySet(mapa))
+    i=it.newIterator(x)
+    while it.hasNext(i):
+        par=mp.get(mapa,it.next(i))
+        entry=me.getValue(par)
+        print(entry['num'])
+    
     
 #    print(mp.size(m))
 

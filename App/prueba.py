@@ -35,11 +35,3 @@ for event in input_file:
 file3=cf.data_dir+'sentiment_values.csv'
 input_file3=csv.DictReader(open(file3, encoding="utf-8"),delimiter=",")
 i=1
-for hashtag in input_file3:
-    while i<2:
-        x=(hashtag[' ss_avg'])
-        if x=='':
-            print('miau')
-        else:
-            print('guau')
-        i+=1

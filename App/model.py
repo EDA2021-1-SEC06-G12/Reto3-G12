@@ -78,20 +78,23 @@ def addevent(catalog,event):
 
 def addtotime(catalog,event):
     mapa=catalog['time']
-    createdat=event['created_at']
-    info=datetime.datetime.strptime(createdat, '%Y-%m-%d %H:%M:%S')
+    info=datetime.datetime.strptime(event['created_at'], '%Y-%m-%d %H:%M:%S')
     time=info.time()
-    prom=promedio(catalog,event['hashtags'])
-    genres=genrebytempo(float(event['tempo']))
-    if prom!=None:
-        if om.contains(mapa,time):
-            pareja=om.get(mapa,time)
-            entry=me.getValue(pareja)
-            lt.addLast(entry['genres'],genres)
-            lt.addLast(entry['promedios'],prom)
-        else:
-            entry=newentrytime(time,genres,prom)
-            om.put(mapa,time,entry)
+    genres=genresbytempo(float(event['tempo']))
+    entry=newentrytime(genres,event)
+    if om.contains(mapa,time):
+        pareja=om.get(mapa,time)
+        lista=me.getValue(pareja)
+        lt.addLast(lista,entry)
+    else:
+        lista=lt.newList()
+        lt.addLast(lista,entry)
+        om.put(mapa,time,lista)
+
+def newentrytime(genres,event):
+    entry={'genres':genres,'hashtags':event['hashtags']}
+    return entry
+
 
 def promedio(catalog,hashtags):
     suma=0
@@ -107,14 +110,9 @@ def promedio(catalog,hashtags):
     if num==0:
         return None
     else:
-        return (suma/num)
+        return suma,num
 
 
-def newentrytime(time,genres,promedio):
-    entry={'time':time,'genres':lt.newList(),'promedios':lt.newList()}
-    lt.addLast(entry['genres'],genres)
-    lt.addLast(entry['promedios'],promedio)
-    return entry
 
 
 def addtomap(mapa,track,artist,llave,x):
@@ -235,7 +233,7 @@ def tenartists(lista):
     return final
 
 
-def genrebytempo(num):
+def genresbytempo(num):
     genres=lt.newList()
     if num>=100 and num<=160:
         lt.addLast(genres,'metal')
@@ -258,3 +256,44 @@ def genrebytempo(num):
     return genres
 
     
+def req5(catalog,lista):
+    mapa=mp.newMap()
+    i=it.newIterator(lista)
+    while it.hasNext(i):
+        entries=it.next(i)
+        ite=it.newIterator(entries)
+        while it.hasNext(ite):
+            entry=it.next(ite)
+            genres=entry['genres']
+            hts=entry['hashtags']
+            nums=promedio(catalog,hts)
+            if nums!=None:
+                itr=it.newIterator(genres)
+                while it.hasNext(itr):
+                    genre=it.next(itr)
+                    if mp.contains(mapa,genre):
+                        par=mp.get(mapa,genre)
+                        entry=me.getValue(par)
+                        entry['sum']+=nums[0]
+                        entry['num']+=nums[1]
+                        i=it.newIterator(hts)
+                        while it.hasNext(i):
+                            ht=it.next(i)
+                            if lt.isPresent(entry['hashtags'],ht)==0:
+                                lt.addLast(entry['hashtags'],ht)
+                    else:
+                        entry=newentry5(genre,nums[0],nums[1],hts)
+                        mp.put(mapa,genre,entry)
+    return mapa
+
+def newentry5(genre,sum,num,hts):
+    entry={'genre':genre,'hashtags':lt.newList(),'sum':sum,'num':num}
+    i=it.newIterator(hts)
+    while it.hasNext(i):
+        ht=it.next(i)
+        lt.addLast(entry['hashtags'],ht)
+    return entry
+# Funciones para agregar informacion al catalogo
+# Funciones utilizadas para comparar elementos dentro de una lista
+
+# Funciones de ordenamiento"""

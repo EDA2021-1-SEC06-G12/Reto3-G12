@@ -67,13 +67,6 @@ while True:
 
     elif int(inputs[0]) == 2:
         catalog=controller.loadData(cont)
-        time=catalog['time']
-        x='7:15:03'
-        info=datetime.datetime.strptime(x,'%H:%M:%S')
-        t=info.time()
-        x=om.get(time,t)
-        value=me.getValue(x)
-        print(value)
         
     elif int(inputs[0])==3:
         minimo=float(input('Ingrese el valor mínimo del rango: '))
@@ -115,7 +108,7 @@ while True:
         x='7:15:00'
         info=datetime.datetime.strptime(x,'%H:%M:%S')
         time=info.time()
-        y='7:25:00'
+        y='9:45:00'
         info1=datetime.datetime.strptime(y,'%H:%M:%S')
         time1=info1.time()
         controller.req5(catalog,time,time1)
