@@ -78,9 +78,9 @@ while True:
         maxenergy=int(input('Valor superior energy: '))
         mindance=int(input('Valor inferior danceability:'))
         maxdance=int(input('Valor superior danceability:'))
-        controller.r2(catalog,minenergy,maxenergy,mindance,maxdance)
+        controller.req2(catalog,minenergy,maxenergy,mindance,maxdance)
     
-    elif int(inputs[0])==9:
+    elif int(inputs[0])==5:
         x=int(input('¿Desea conocer información sobre géneros ya existentes? [0: sí // 1: no]: '))
         if x==0:
             genres=input('¿Cuáles? [escríbalos separados por una coma y espacio. Ej: reggae, hip-hop]: ')

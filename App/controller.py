@@ -89,7 +89,7 @@ def req1(menor,mayor,feature,catalog):
     print('\n'+feature+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(events)+'\nTotal of unique artists: '+str(artists))
 
 
-def r2(catalog,min1,max1,min2,max2):
+def req2(catalog,min1,max1,min2,max2):
     keys1=om.values(catalog['energy'],min1,max1)
     keys2=om.values(catalog['danceability'],min2,max2)
     lista1=model.listaconlistas(keys1)
