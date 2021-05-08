@@ -80,21 +80,14 @@ def addtotime(catalog,event):
     mapa=catalog['time']
     info=datetime.datetime.strptime(event['created_at'], '%Y-%m-%d %H:%M:%S')
     time=info.time()
-    genres=genresbytempo(float(event['tempo']))
-    entry=newentrytime(genres,event)
     if om.contains(mapa,time):
         pareja=om.get(mapa,time)
         lista=me.getValue(pareja)
-        lt.addLast(lista,entry)
+        lt.addLast(lista,event)
     else:
         lista=lt.newList()
-        lt.addLast(lista,entry)
+        lt.addLast(lista,event)
         om.put(mapa,time,lista)
-
-def newentrytime(genres,event):
-    entry={'genres':genres,'hashtags':event['hashtags']}
-    return entry
-
 
 def promedio(catalog,hashtags):
     suma=0
@@ -256,43 +249,43 @@ def genresbytempo(num):
     return genres
 
     
-def req5(catalog,lista):
+def suicidio(catalog,lista):
     mapa=mp.newMap()
     i=it.newIterator(lista)
     while it.hasNext(i):
-        entries=it.next(i)
-        ite=it.newIterator(entries)
+        listainterna=it.next(i)
+        ite=it.newIterator(listainterna)
         while it.hasNext(ite):
-            entry=it.next(ite)
-            genres=entry['genres']
-            hts=entry['hashtags']
-            nums=promedio(catalog,hts)
-            if nums!=None:
-                itr=it.newIterator(genres)
-                while it.hasNext(itr):
-                    genre=it.next(itr)
-                    if mp.contains(mapa,genre):
-                        par=mp.get(mapa,genre)
-                        entry=me.getValue(par)
-                        entry['sum']+=nums[0]
-                        entry['num']+=nums[1]
-                        i=it.newIterator(hts)
-                        while it.hasNext(i):
-                            ht=it.next(i)
-                            if lt.isPresent(entry['hashtags'],ht)==0:
-                                lt.addLast(entry['hashtags'],ht)
-                    else:
-                        entry=newentry5(genre,nums[0],nums[1],hts)
-                        mp.put(mapa,genre,entry)
+            event=it.next(ite)
+            tupla=(event['track_id'],event['user_id'],event['created_at'])
+            track=event['track_id']
+            tempo=event['tempo']
+            genres=genresbytempo(float(tempo))
+            w=it.newIterator(genres)
+            while it.hasNext(w):
+                genre=it.next(w)
+                if mp.contains(mapa,genre):
+                    par=mp.get(mapa,genre)
+                    val=me.getValue(par)
+                    if lt.isPresent(val['unique'],tupla)==0:
+                        lt.addLast(val['unique'],tupla)
+                    if lt.isPresent(val['tracks'],track)==0:
+                        lt.addLast(val['tracks'],track)
+                else:
+                        val=entrysuicidio(genre,tupla,track)
+                        mp.put(mapa,genre,val)
+
     return mapa
 
-def newentry5(genre,sum,num,hts):
-    entry={'genre':genre,'hashtags':lt.newList(),'sum':sum,'num':num}
-    i=it.newIterator(hts)
-    while it.hasNext(i):
-        ht=it.next(i)
-        lt.addLast(entry['hashtags'],ht)
+def entrysuicidio(genre,tupla,track):
+    entry={'genre':genre,'unique':lt.newList(),'tracks':lt.newList()}
+    lt.addLast(entry['unique'],tupla)
+    lt.addLast(entry['tracks'],track)
     return entry
+    
+    
+    
+
 # Funciones para agregar informacion al catalogo
 # Funciones utilizadas para comparar elementos dentro de una lista
 

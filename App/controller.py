@@ -176,13 +176,17 @@ def req4(catalog,genre,minimo,maximo):
 
 def req5(catalog,minim,maxim):
     lista=om.values(catalog['time'],minim,maxim)
-    mapa=(model.req5(catalog,lista))
-    x=(mp.keySet(mapa))
-    i=it.newIterator(x)
-    while it.hasNext(i):
-        par=mp.get(mapa,it.next(i))
-        entry=me.getValue(par)
-        print(entry['num'])
+    mapa=(model.suicidio(catalog,lista))
+    mapi=(model.mayor(mapa))
+    num=lt.size(om.keySet(mapi))
+    i=1
+    while i<=num:
+        y=om.maxKey(mapi)
+        v=om.get(mapi,y)
+        p=me.getValue(v)
+        print(y,p)
+        mapi=om.deleteMax
+        i+=1
     
     
 #    print(mp.size(m))
