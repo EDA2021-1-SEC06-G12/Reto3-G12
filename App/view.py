@@ -19,7 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
-
+import tracemalloc
+import time
 import config as cf
 import sys
 import datetime
@@ -48,6 +49,7 @@ def printMenu():
     print("4- Consultar canciones de fiesta")
     print("5 - Consultar canciones para estudiar")
     print("6 - Consultar número de canciones para un género")
+    print("7 - Indicar el género musical más escuchado en el tiempo")
     print("0- Salir")
 
 catalog = None
@@ -72,45 +74,98 @@ while True:
         minimo=float(input('Ingrese el valor mínimo del rango: '))
         maximo=float(input('Ingrese el valor máximo del rango: '))
         feature=input('Ingrese la característica de contenido: ')
-        print(controller.req1(minimo,maximo,feature.lower(),catalog))
+        x = controller.req1(minimo,maximo,feature.lower(),catalog)
+        print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}")
+       
 
     elif int(inputs[0])==4:
         minenergy=float(input('Valor inferior energy: '))
         maxenergy=float(input('Valor superior energy: '))
         mindance=float(input('Valor inferior danceability:'))
         maxdance=float(input('Valor superior danceability:'))
-        controller.req2_3(catalog,minenergy,maxenergy,mindance,maxdance)
-    
+        x = controller.req2(catalog,minenergy,maxenergy,mindance,maxdance)
+        print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}")
+
     elif int(inputs[0])==5:
+        mininstrum=float(input('Valor inferior instrumentalness: '))
+        maxinstrum=float(input('Valor superior instrumentalness: '))
+        mintempo=float(input('Valor inferior tempo: '))
+        maxtempo=float(input('Valor superior tempo: '))
+        controller.req3(catalog,mininstrum,maxinstrum,mintempo,maxtempo)
+    
+    elif int(inputs[0])==6:
+        delta_time = -1.0
+        delta_memory = -1.0
+
+        tracemalloc.start()
+        start_time = controller.getTime()
+        start_memory = controller.getMemory()
+
         x=int(input('¿Desea conocer información sobre géneros ya existentes? [0: sí // 1: no]: '))
         if x==0:
             genres=input('¿Cuáles? [escríbalos separados por una coma y espacio. Ej: reggae, hip-hop]: ')
             lista=(genres.lower()).split(', ')
             for genre in lista:
-                controller.req4(catalog,genre,None,None)
+                controller.req4(catalog,genre,None,None,None,None)
             print('\n')
         y=int(input('¿Desea conocer información sobre un género no existente? [0: sí // 1: no]: '))
         if y==0:
             name=input('Ingrese el nombre del nuevo género: ')
-            minim=int(input('Ingrese el valor mínimo de tempo: '))
-            maxim=int(input('Ingrese el valor máximo de tempo: '))
+            minim=float(input('Ingrese el valor mínimo de tempo: '))
+            maxim=float(input('Ingrese el valor máximo de tempo: '))
             controller.req4(catalog,name,minim,maxim)
             print('\n')
 
-    elif int(inputs[0])==9:
-        min_inst=float(input('Valor inferior instrumentalness: '))
-        max_inst=float(input('Valor superior instrumentalness: '))
-        min_temp=float(input('Valor inferior tempo:'))
-        max_temp=float(input('Valor superior tempo:'))
-        controller.req3(catalog,min_inst,max_inst,min_temp,max_temp)
-    
-    elif int(inputs[0])==11: 
-        min_inst=float(input('Valor inferior instrumentalness: '))
-        max_inst=float(input('Valor superior instrumentalness: '))
-        min_temp=float(input('Valor inferior tempo:'))
-        max_temp=float(input('Valor superior tempo:'))
-        controller.req3(catalog,min_inst,max_inst,min_temp,max_temp)
+        stop_memory = controller.getMemory()
+        stop_time = controller.getTime()
+        tracemalloc.stop()
+
+        delta_time = stop_time - start_time
+        delta_memory = controller.deltaMemory(start_memory, stop_memory)
+        print("Tiempo [ms]: "+f"{delta_time:.3f}"+" ||  "+"Memoria [kB]: "+f"{delta_memory:.3f}")
+
+    elif int(inputs[0])==7:
+        x='7:15:00'
+        info=datetime.datetime.strptime(x,'%H:%M:%S')
+        y='9:45:00'
+        info1=datetime.datetime.strptime(y,'%H:%M:%S')
+        controller.req5(catalog,info,info1)
+
+
 
     else:
         sys.exit(0)
 sys.exit(0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def comparedates(date1,date2):
+    if date1==date2:
+        return 0
+    elif date1>date2:
+        return 1
+    else:
+        return -1
+
+def cmpgenres(genre1,genre2):
+    return (genre1[1])>=(genre2[1])

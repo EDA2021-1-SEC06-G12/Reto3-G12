@@ -45,7 +45,7 @@ def newCatalog():
     -Fechas
     Retorna el analizador inicializado.
     """
-    catalog = {'eventos':None,'energy':None,'instrumentalness':None,'danceability':None,'tempo':None,'acousticness':None}
+    catalog = {'eventos':None,'energy':None,'instrumentalness':None,'danceability':None,'tempo':None,'acousticness':None,'hashtags':None}
     catalog['eventos']=lt.newList(datastructure="ARRAY_LIST")
     catalog['energy']=om.newMap(omaptype="RBT")
     catalog['instrumentalness']=om.newMap(omaptype="RBT")
@@ -56,66 +56,98 @@ def newCatalog():
     catalog['speechiness']=om.newMap(omaptype="RBT")
     catalog['valence']=om.newMap(omaptype="RBT")
     catalog['time']=om.newMap(omaptype="RBT")
-    catalog["tempo2"] = om.newMap(omaptype="RBT")
-    catalog["energy2"] = om.newMap(omaptype="RBT")
-
+    catalog["energy"] = om.newMap(omaptype="RBT")
+    catalog["hashtags"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
     return catalog
 
+def addhashtag(catalog,hashtag,vader):
+    mapa=catalog['hashtags']
+    mp.put(mapa,hashtag,float(vader))
+
 def addevent(catalog,event):
-    """
+    addtomap2(catalog["tempo"],event,"tempo")
+    addtomap2(catalog["time"], event, "created_at")
     lt.addLast(catalog['eventos'],event)
-    
-    addtomap(catalog['energy'],event['track_id'],event['artist_id'],float(event['energy']),1)
-    addtomap(catalog['instrumentalness'],event['track_id'],event['artist_id'],float(event['instrumentalness']),1)
-    addtomap(catalog['danceability'],event['track_id'],event['artist_id'],float(event['danceability']),1)
-    addtomap(catalog['tempo'],event['track_id'],event['artist_id'],float(event['tempo']),1,)
-    addtomap(catalog['acousticness'],None,event['artist_id'],float(event['acousticness']),0)
-    addtomap(catalog['liveness'],None,event['artist_id'],float(event['liveness']),0)
-    addtomap(catalog['speechiness'],None,event['artist_id'],float(event['speechiness']),0)
-    addtomap(catalog['valence'],None,event['artist_id'],float(event['valence']),0)
+    addtomap2(catalog["energy"],event,"energy")
+    addtomap2(catalog["instrumentalness"], event, "instrumentalness")
+    addtomap2(catalog["danceability"],event,"danceability")
+
+    addtomap2(catalog["acousticness"],event,"acousticness")
+    addtomap2(catalog["liveness"],event,"liveness")
+    addtomap2(catalog["speechiness"],event,"speechiness")
+    addtomap2(catalog["valence"],event,"valence")
     """
-    addtomap2(catalog["tempo2"],event,"tempo")
-    addtomap2(catalog["energy2"],event,"energy")
+    addtotime(catalog,event)
+    """
 
 def addtomap2(mapa,event,caract):
-    llave = float(event[caract])
-    if om.contains(mapa,llave):
-        pareja=om.get(mapa,llave)
-
-        value = pareja["value"]
-        lt.addLast(value["events"], event)
-       
+    if caract == "created_at":
+        hora = event[caract].split(" ")[1]
+        hora = datetime.datetime.strptime(hora, '%H:%M:%S')
+        llave = hora 
+        if om.contains(mapa,llave):
+            pareja=om.get(mapa,llave)
+            value = pareja["value"]
+            lt.addLast(value["events"], event)
+            lt.addLast(value["artists"], event["artist_id"])
+            value["num_events"] += 1
+        
+        else:
+            entr = entrada(event,caract)
+            om.put(mapa,llave,entr)
     else:
-        entr = entrada(event,caract)
-        lt.addLast(entr["events"], event)
-        om.put(mapa,llave,entr)
+        llave = float(event[caract])
+        if om.contains(mapa,llave):
+            pareja=om.get(mapa,llave)
+            value = pareja["value"]
+            lt.addLast(value["events"], event)
+            lt.addLast(value["artists"], event["artist_id"])
+            value["num_events"] += 1
+        
+        else:
+            entr = entrada(event,caract)
+            om.put(mapa,llave,entr)
 
 def entrada(event,caract):
-    entry = {"llave":event[caract],"events":lt.newList(datastructure="ARRAY_LIST")}
-    return entry
+    entry = {"llave":event[caract],"events":None,"num_events":1,"artists":None}
+    entry["events"] = lt.newList(datastructure="ARRAY_LIST")
+    lt.addLast(entry["events"], event)
+    entry["artists"] = lt.newList(datastructure="ARRAY_LIST")
+    lt.addLast(entry["artists"], event["artist_id"])
 
+    return entry
+"""
 def addtotime(catalog,event):
     mapa=catalog['time']
-    createdat=event['created_at']
-    info=datetime.datetime.strptime(createdat, '%Y-%m-%d %H:%M:%S')
+    info=datetime.datetime.strptime(event['created_at'], '%Y-%m-%d %H:%M:%S')
     time=info.time()
-    if event['hashtags']!=None:
-        if om.contains(mapa,time):
-            pareja=om.get(mapa,time)
-            entry=me.getValue(pareja)
-            tempos=entry['tempos']
-            lt.addLast(tempos,event['tempo'])
-        else:
-            entry=newentrytime(time,event['tempo'])
-            om.put(mapa,time,entry)
+    if om.contains(mapa,time):
+        pareja=om.get(mapa,time)
+        lista=me.getValue(pareja)
+        lt.addLast(lista,event)
+    else:
+        lista=lt.newList()
+        lt.addLast(lista,event)
+        om.put(mapa,time,lista)
+"""
+def promedio(catalog,hashtags):
+    suma=0
+    num=0
+    i=it.newIterator(hashtags)
+    while it.hasNext(i):
+        ht=(it.next(i)).lower()
+        if mp.contains(catalog['hashtags'],ht):
+            pareja=mp.get(catalog['hashtags'],ht)
+            n=me.getValue(pareja)
+            suma+=n
+            num+=1
+    if num==0:
+        return None
+    else:
+        return suma,num
 
-def newentrytime(time,tempo):
-    genres=genrebytempo(tempo)
 
-    
-    entry={'time':time,'tempos':lt.newList()}
-    lt.addLast(entry['tempos'],tempo)
-    return entry
+
 
 def addtomap(mapa,track,artist,llave,x):
     if om.contains(mapa,llave):
@@ -164,6 +196,17 @@ def listaeventos(mapa,lista):
     
     return final
 
+def list_art(lista):
+    final = lt.newList(datastructure="ARRAY_LIST")
+    i=it.newIterator(lista)
+    while it.hasNext(i):
+        key = it.next(i)
+        artistas = key["artists"]
+        ite = it.newIterator(artistas)
+        while it.hasNext(ite):
+            artista = it.next(ite)
+            lt.addLast(final, artista)
+    return final
 
 def listaconlistas(lista):
     uno=lt.firstElement(lista)
@@ -209,12 +252,12 @@ def numevents(lista):
     i=it.newIterator(lista)
     while it.hasNext(i):
         entry=it.next(i)
-        num=entry['events']
+        num=entry['num_events']
         final+=num
     return final
 
-def artists(lista):
-    lfinal=lt.newList()
+def artists(lista,x):
+    lfinal=lt.newList(datastructure="ARRAY_LIST")
     entry1=lt.firstElement(lista)
     final=entry1['artists']
     lt.deleteElement(lista,1)
@@ -228,7 +271,7 @@ def artists(lista):
             if lt.isPresent(final,artist)==0:
                 lt.addLast(final,artist)
     i=1
-    while i<10:
+    while i<=x:
         lt.addLast(lfinal,lt.getElement(final,i))
         i+=1
     return lt.size(final),lfinal
@@ -248,7 +291,7 @@ def tenartists(lista):
     return final
 
 
-def genrebytempo(num):
+def genresbytempo(num):
     genres=lt.newList()
     if num>=100 and num<=160:
         lt.addLast(genres,'metal')
@@ -271,8 +314,44 @@ def genrebytempo(num):
     return genres
 
     
+def suicidio(catalog,lista):
+    mapa=mp.newMap()
+    i=it.newIterator(lista)
+    while it.hasNext(i):
+        listainterna=it.next(i)
+        ite=it.newIterator(listainterna)
+        while it.hasNext(ite):
+            event=it.next(ite)
+            tupla=(event['track_id'],event['user_id'],event['created_at'])
+            track=event['track_id']
+            tempo=event['tempo']
+            genres=genresbytempo(float(tempo))
+            w=it.newIterator(genres)
+            while it.hasNext(w):
+                genre=it.next(w)
+                if mp.contains(mapa,genre):
+                    par=mp.get(mapa,genre)
+                    val=me.getValue(par)
+                    if lt.isPresent(val['unique'],tupla)==0:
+                        lt.addLast(val['unique'],tupla)
+                    if lt.isPresent(val['tracks'],track)==0:
+                        lt.addLast(val['tracks'],track)
+                else:
+                        val=entrysuicidio(genre,tupla,track)
+                        mp.put(mapa,genre,val)
+
+    return mapa
+
+def entrysuicidio(genre,tupla,track):
+    entry={'genre':genre,'unique':lt.newList(),'tracks':lt.newList()}
+    lt.addLast(entry['unique'],tupla)
+    lt.addLast(entry['tracks'],track)
+    return entry
+    
+    
+    
 
 # Funciones para agregar informacion al catalogo
 # Funciones utilizadas para comparar elementos dentro de una lista
 
-# Funciones de ordenamiento
+# Funciones de ordenamiento"""
