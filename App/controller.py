@@ -20,20 +20,17 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+from datetime import datetime
 import config as cf
 import model
 import csv
-import time
-import tracemalloc
-import random
-
-from datetime import datetime
-
 from DISClib.DataStructures import listiterator as it
 from DISClib.ADT import orderedmap as om
+from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
-from DISClib.ADT import map as mp
+import tracemalloc
+import time
 
 
 """
@@ -58,143 +55,171 @@ def loadData(catalog):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    eventsfile=cf.data_dir + 'context_content_features-small.csv'
-    input_file = csv.DictReader(open(eventsfile, encoding="utf-8"),delimiter=",")
-    for evento in input_file:
-        model.addevent(catalog,evento)
+    file1=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
+    input_file1 = csv.DictReader(open(file1, encoding="utf-8"),delimiter=",")
+    mapa=mp.newMap()
+    for event in input_file1:
+        llave=(event['track_id'],event['user_id'],event['created_at'])
+        if mp.contains(mapa,llave):
+            pareja=mp.get(mapa,llave)
+            lista=me.getValue(pareja)
+            lt.addLast(lista,event['hashtag'])
+        else:
+            lista=lt.newList()
+            lt.addLast(lista,event['hashtag'])
+            mp.put(mapa,llave,lista)
 
-    lista = catalog["usertrackhashtagtimestamp"]
-    userTHT_file=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
-    input2_file = csv.DictReader(open(userTHT_file, encoding="utf-8"),delimiter=",")
-    for evento in input2_file:
-        model.add_2(lista,evento)
-    
-    lista2 = catalog["sentiment_val"]
-    sentimenalval_file = cf.data_dir+'user_track_hashtag_timestamp-small.csv'
-    input3_file = csv.DictReader(open(sentimenalval_file, encoding="utf-8"),delimiter=",")
-    for evento in input2_file:
-        model.add_2(lista2,evento)
+    file2=cf.data_dir + 'context_content_features-small.csv'
+    input_file2 = csv.DictReader(open(file2, encoding="utf-8"),delimiter=",")
+    for event in input_file2:
+        llave=(event['track_id'],event['user_id'],event['created_at'])
+        if mp.contains(mapa,llave):
+            pareja=mp.get(mapa,llave)
+            hashtags=me.getValue(pareja)
+            event['hashtags']=hashtags
+        else:
+            event['hashtags']=None
+        model.addevent(catalog,event)
+
+
+    file3=cf.data_dir+'sentiment_values.csv'
+    input_file3=csv.DictReader(open(file3, encoding="utf-8"),delimiter=",")
+    for hashtag in input_file3:
+        print(hashtag)
 
     return catalog
 
-def req1(mayor,menor,content,catalog):
-    delta_time = -1.0
-    delta_memory = -1.0
+def req1(menor,mayor,feature,catalog):
+    events=model.numevents(om.values(catalog[feature],menor,mayor))
+    artists=(model.artists(om.values(catalog[feature],menor,mayor)))[0]
+    print('\n'+feature+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(events)+'\nTotal of unique artists: '+str(artists))
 
-    tracemalloc.start()
-    start_time = getTime()
-    start_memory = getMemory()
+def req2_3(catalog,min_en,max_en,min_dan,max_dan):
+    keys1 = om.values(catalog["energy2"],min_en,max_en)
+    lista1 = model.listaeventos(catalog["energy2"],keys1)
+    mapa = om.newMap(omaptype="RBT")
 
-    lista_mapa = model.ListaPorContenido_TablaHashPorArtistas(mayor, menor, content, catalog)
-    #mapa_artistas = model.TablaHashPorArtistas(lista_filtrada)
-    artists = mp.size(lista_mapa[1])
-    events = lt.size(lista_mapa[0])
+    i1 = it.newIterator(lista1)
+    while it.hasNext(i1):
+        event = it.next(i1)
+        model.addtomap2(mapa, event,"danceability")
 
-    stop_memory = getMemory()
-    stop_time = getTime()
-    tracemalloc.stop()
+    keys2 = om.values(mapa,min_dan,max_dan)
+    lista2 = model.listaeventos(mapa,keys2)
 
-    delta_time = stop_time - start_time
-    delta_memory = deltaMemory(start_memory, stop_memory)
-
-    return artists,events, delta_time, delta_memory
-
-def req2(minimoEnergy,maximoEnergy,minimoDanceability,maximoDanceability,catalog):
-    delta_time = -1.0
-    delta_memory = -1.0
-
-    tracemalloc.start()
-    start_time = getTime()
-    start_memory = getMemory()
-
-    lista = catalog["eventos"]
-    filtro_En = model.FiltrarPorRango(minimoEnergy, maximoEnergy, "energy", lista)
-    filtro_Da = model.FiltrarPorRango(minimoDanceability, maximoDanceability, "danceability", filtro_En)
-
-    mapa = model.TablaHashPorTrack(filtro_Da)
-    total = mp.size(mapa)
-
-    mi = random.randint(1,lt.size(filtro_Da))
-
-    aleatorios = lt.subList(filtro_Da,mi,5)
-
-    stop_memory = getMemory()
-    stop_time = getTime()
-    tracemalloc.stop()
-
-    delta_time = stop_time - start_time
-    delta_memory = deltaMemory(start_memory, stop_memory)
-
-    return total,aleatorios,delta_time, delta_memory
-
-def req3(minimoIn,maximoIn,minimoTe,maximoTe,catalog):
-    """
-    """
-    delta_time = -1.0
-    delta_memory = -1.0
-
-    tracemalloc.start()
-    start_time = getTime()
-    start_memory = getMemory()
-
-    lista = catalog["eventos"]
-    filtro_In = model.FiltrarPorRango(minimoIn, maximoIn, "instrumentalness", lista)
-    filtro_Te = model.FiltrarPorRango(minimoTe, maximoTe, "tempo", filtro_In)
-
-    mapa = model.TablaHashPorTrack(filtro_Te)
-    total = mp.size(mapa)
+    mapafin = mp.newMap(maptype="PROBING",loadfactor=0.5)
+    i2 = it.newIterator(lista2)
+    while it.hasNext(i2):
+        event = it.next(i2)
+        mp.put(mapafin, event["track_id"],event)
     
-    aleatorios = lt.newList(datastructure="ARRAY_LIST")
-    i = 1
-    while i <= lt.size(filtro_Te):
-        elem = lt.getElement(filtro_Te, i)
-        lt.addLast(aleatorios, elem)
-        i += 1
-    
-    stop_memory = getMemory()
-    stop_time = getTime()
-    tracemalloc.stop()
+    print('\Energy is between '+str(min_en)+' and '+str(max_en)+'\Danceability is between '+str(min_dan)+' and '+str(max_dan)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
 
-    delta_time = stop_time - start_time
-    delta_memory = deltaMemory(start_memory, stop_memory)
+    n = 1
+    listakeys = mp.keySet(mapafin)
+    while n<=5:
+        llave = lt.getElement(listakeys, n)
+        event = mp.get(mapafin,llave)["value"]
 
-    return total,aleatorios,delta_time, delta_memory
+        print('Track '+str(n)+': '+ event["track_id"]+' with energy of '+str(event["energy"])+' and danceability of '+str(event["danceability"]))
+        n +=1
+    print('\n')
 
-   
-
-
-
-"""
-def req1(mayor,menor,content,catalog):
-    mapa=model.RBTporContenido(mayor,menor,content,catalog)
-    llaves=om.keys(mapa)
-    i=it.newIterator(llaves)
-    artists= om.newMap(omaptype="RBT")
-    events=0
-    altura=om.height(mapa)
-    num=om.size(mapa)
+def req2(catalog,min1,max1,min2,max2):
+    keys1=om.values(catalog['energy'],min1,max1)
+    keys2=om.values(catalog['danceability'],min2,max2)
+    lista1=model.listaconlistas(keys1)
+    final=model.dosfeatures(keys2,lista1)
+    print('\nEnergy is between '+str(min1)+' and '+str(max1)+'\nDanceability is between '+str(min2)+' and '+str(max2)+'\nTotal of unique tracks in events: '+str(final)+'\n')
+    random=model.random5(catalog,'energy','danceability',min1,max1,min2,max2)
+    i=it.newIterator(random)
+    n=0
+    print('--- Unique track_id ---')
     while it.hasNext(i):
-        entry=om.get(mapa,it.next(i))
-        valor=me.getValue(entry)
-        art=valor["artists"]
-        artists+=lt.size(art)
-        events+=valor['events']
-    return artists,events,altura,num
-"""
+        event=it.next(i)
+        n+=1
+        print('Track '+str(n)+': '+ event[0]+' with energy of '+str(event[1])+' and danceability of '+str(event[2]))
+    print('\n')
 
-# Funciones de ordenamiento
+def req3(catalog,min_inst,max_inst,min_temp,max_temp):
+    keys1 = om.values(catalog["tempo2"],min_temp,max_temp)
+    lista1 = model.listaeventos(catalog["tempo2"],keys1)
+    mapa = om.newMap(omaptype="RBT")
 
-# Funciones de consulta sobre el catálogo
+    i1 = it.newIterator(lista1)
+    while it.hasNext(i1):
+        event = it.next(i1)
+        model.addtomap2(mapa, event,"instrumentalness")
 
-# ======================================
-# Funciones para medir tiempo y memoria
-# ======================================
+    keys2 = om.values(mapa,min_inst,max_inst)
+    lista2 = model.listaeventos(mapa,keys2)
 
+    mapafin = mp.newMap(maptype="PROBING",loadfactor=0.5)
+    i2 = it.newIterator(lista2)
+    while it.hasNext(i2):
+        event = it.next(i2)
+        mp.put(mapafin, event["track_id"],event)
+    
+    print('\Instrumentalness is between '+str(min_inst)+' and '+str(max_inst)+'\nTempo is between '+str(min_temp)+' and '+str(max_temp)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
+
+    n = 1
+    listakeys = mp.keySet(mapafin)
+    while n<=5:
+        llave = lt.getElement(listakeys, n)
+        event = mp.get(mapafin,llave)["value"]
+
+        print('Track '+str(n)+': '+ event["track_id"]+' with instrumentalness of '+str(event["instrumentalness"])+' and tempo of '+str(event["tempo"]))
+        n +=1
+    print('\n')
+
+
+
+def req4(catalog,genre,minimo,maximo):
+    if minimo==None:
+        if genre=='reggae':
+            menor=60
+            mayor=90
+        elif genre=='down-tempo':
+            menor=70
+            mayor=100
+        elif genre=='chill-out':
+            menor=90
+            mayor=120
+        elif genre=='hip-hop':
+            menor=85
+            mayor=112
+        elif genre=='jazz and funk':
+            menor=120
+            mayor=125
+        elif genre=='pop':
+            menor=100
+            mayor=130
+        elif genre=='r&b':
+            menor=60
+            mayor=80
+        elif genre=='rock':
+            menor=100
+            mayor=140
+        elif genre=='metal':
+            menor=100
+            mayor=160
+    else:
+        menor=minimo
+        mayor=maximo
+
+    eventos=model.numevents(om.values(catalog['tempo'],menor,mayor))
+    y=model.artists(om.values(catalog['tempo'],menor,mayor))
+    numartists=y[0]
+    listartists=y[1]
+    print('\n======= '+genre.upper()+' ========'+'\nFor '+genre+' the tempo is between '+str(menor)+' and '+str(mayor)+'\n'+genre+' reproductions: '+str(eventos)+' with '+str(numartists)+' different artists'+'\n\n---- Some artists for '+genre+' -----\n')
+    i=it.newIterator(listartists)
+    n=1
+    while it.hasNext(i):
+        artist=it.next(i)
+        print('Artist '+str(n)+': '+artist)
+        n+=1
 
 def getTime():
-    """
-    devuelve el instante tiempo de procesamiento en milisegundos
-    """
     return float(time.perf_counter()*1000)
 
 
