@@ -67,6 +67,13 @@ while True:
 
     elif int(inputs[0]) == 2:
         catalog=controller.loadData(cont)
+        time=catalog['time']
+        x='7:15:03'
+        info=datetime.datetime.strptime(x,'%H:%M:%S')
+        t=info.time()
+        x=om.get(time,t)
+        value=me.getValue(x)
+        print(value)
         
     elif int(inputs[0])==3:
         minimo=float(input('Ingrese el valor mínimo del rango: '))
@@ -75,13 +82,20 @@ while True:
         print(controller.req1(minimo,maximo,feature.lower(),catalog))
 
     elif int(inputs[0])==4:
-        minenergy=int(input('Valor inferior energy: '))
-        maxenergy=int(input('Valor superior energy: '))
-        mindance=int(input('Valor inferior danceability:'))
-        maxdance=int(input('Valor superior danceability:'))
+        minenergy=float(input('Valor inferior energy: '))
+        maxenergy=float(input('Valor superior energy: '))
+        mindance=float(input('Valor inferior danceability: '))
+        maxdance=float(input('Valor superior danceability: '))
         controller.req2(catalog,minenergy,maxenergy,mindance,maxdance)
-    
+
     elif int(inputs[0])==5:
+        mininstrum=float(input('Valor inferior instrumentalness: '))
+        maxinstrum=float(input('Valor superior instrumentalness: '))
+        mintempo=float(input('Valor inferior tempo: '))
+        maxtempo=float(input('Valor superior tempo: '))
+        controller.req3(catalog,mininstrum,maxinstrum,mintempo,maxtempo)
+    
+    elif int(inputs[0])==6:
         x=int(input('¿Desea conocer información sobre géneros ya existentes? [0: sí // 1: no]: '))
         if x==0:
             genres=input('¿Cuáles? [escríbalos separados por una coma y espacio. Ej: reggae, hip-hop]: ')
@@ -92,17 +106,21 @@ while True:
         y=int(input('¿Desea conocer información sobre un género no existente? [0: sí // 1: no]: '))
         if y==0:
             name=input('Ingrese el nombre del nuevo género: ')
-            minim=int(input('Ingrese el valor mínimo de tempo: '))
-            maxim=int(input('Ingrese el valor máximo de tempo: '))
+            minim=float(input('Ingrese el valor mínimo de tempo: '))
+            maxim=float(input('Ingrese el valor máximo de tempo: '))
             controller.req4(catalog,name,minim,maxim)
             print('\n')
-
-    elif int(inputs[0])==9:
-        lista=lt.newList()
-        lt.addLast(1)
-        l2=lt.newList()
-        lt.addLast(l2)
         
+    elif int(inputs[0])==9:
+        x='7:15:00'
+        info=datetime.datetime.strptime(x,'%H:%M:%S')
+        time=info.time()
+        y='7:25:00'
+        info1=datetime.datetime.strptime(y,'%H:%M:%S')
+        time1=info1.time()
+        controller.req5(catalog,time,time1)
+
+
 
     else:
         sys.exit(0)

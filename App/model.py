@@ -45,7 +45,8 @@ def newCatalog():
     -Fechas
     Retorna el analizador inicializado.
     """
-    catalog = {'eventos':None,'energy':None,'instrumentalness':None,'danceability':None,'tempo':None,'acousticness':None}
+    catalog = {'eventos':None,'energy':None,'instrumentalness':None,'danceability':None,'tempo':None,'acousticness':None,'hashtags':None}
+    catalog['hashtags']=mp.newMap()
     catalog['eventos']=lt.newList()
     catalog['energy']=om.newMap()
     catalog['instrumentalness']=om.newMap()
@@ -56,8 +57,11 @@ def newCatalog():
     catalog['speechiness']=om.newMap()
     catalog['valence']=om.newMap()
     catalog['time']=om.newMap()
-
     return catalog
+
+def addhashtag(catalog,hashtag,vader):
+    mapa=catalog['hashtags']
+    mp.put(mapa,hashtag,float(vader))
 
 def addevent(catalog,event):
     lt.addLast(catalog['eventos'],event)
@@ -69,6 +73,7 @@ def addevent(catalog,event):
     addtomap(catalog['liveness'],None,event['artist_id'],float(event['liveness']),0)
     addtomap(catalog['speechiness'],None,event['artist_id'],float(event['speechiness']),0)
     addtomap(catalog['valence'],None,event['artist_id'],float(event['valence']),0)
+    addtotime(catalog,event)
 
 
 def addtotime(catalog,event):
@@ -76,23 +81,41 @@ def addtotime(catalog,event):
     createdat=event['created_at']
     info=datetime.datetime.strptime(createdat, '%Y-%m-%d %H:%M:%S')
     time=info.time()
-    if event['hashtags']!=None:
+    prom=promedio(catalog,event['hashtags'])
+    genres=genrebytempo(float(event['tempo']))
+    if prom!=None:
         if om.contains(mapa,time):
             pareja=om.get(mapa,time)
             entry=me.getValue(pareja)
-            tempos=entry['tempos']
-            lt.addLast(tempos,event['tempo'])
+            lt.addLast(entry['genres'],genres)
+            lt.addLast(entry['promedios'],prom)
         else:
-            entry=newentrytime(time,event['tempo'])
+            entry=newentrytime(time,genres,prom)
             om.put(mapa,time,entry)
 
-def newentrytime(time,tempo):
-    genres=genrebytempo(tempo)
+def promedio(catalog,hashtags):
+    suma=0
+    num=0
+    i=it.newIterator(hashtags)
+    while it.hasNext(i):
+        ht=(it.next(i)).lower()
+        if mp.contains(catalog['hashtags'],ht):
+            pareja=mp.get(catalog['hashtags'],ht)
+            n=me.getValue(pareja)
+            suma+=n
+            num+=1
+    if num==0:
+        return None
+    else:
+        return (suma/num)
 
-    
-    entry={'time':time,'tempos':lt.newList()}
-    lt.addLast(entry['tempos'],tempo)
+
+def newentrytime(time,genres,promedio):
+    entry={'time':time,'genres':lt.newList(),'promedios':lt.newList()}
+    lt.addLast(entry['genres'],genres)
+    lt.addLast(entry['promedios'],promedio)
     return entry
+
 
 def addtomap(mapa,track,artist,llave,x):
     if om.contains(mapa,llave):
@@ -177,7 +200,7 @@ def numevents(lista):
         final+=num
     return final
 
-def artists(lista):
+def artists(lista,x):
     lfinal=lt.newList()
     entry1=lt.firstElement(lista)
     final=entry1['artists']
@@ -192,7 +215,7 @@ def artists(lista):
             if lt.isPresent(final,artist)==0:
                 lt.addLast(final,artist)
     i=1
-    while i<10:
+    while i<=x:
         lt.addLast(lfinal,lt.getElement(final,i))
         i+=1
     return lt.size(final),lfinal
@@ -235,8 +258,3 @@ def genrebytempo(num):
     return genres
 
     
-
-# Funciones para agregar informacion al catalogo
-# Funciones utilizadas para comparar elementos dentro de una lista
-
-# Funciones de ordenamiento

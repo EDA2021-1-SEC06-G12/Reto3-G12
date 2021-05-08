@@ -55,6 +55,12 @@ def loadData(catalog):
     """
     Carga los datos de los archivos CSV en el modelo
     """
+    file3=cf.data_dir+'sentiment_values.csv'
+    input_file3=csv.DictReader(open(file3, encoding="utf-8"),delimiter=",")
+    for hashtag in input_file3:
+        if hashtag['vader_avg']!='':
+            model.addhashtag(catalog,hashtag['hashtag'],hashtag['vader_avg'])
+
     file1=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
     input_file1 = csv.DictReader(open(file1, encoding="utf-8"),delimiter=",")
     mapa=mp.newMap()
@@ -81,17 +87,11 @@ def loadData(catalog):
             event['hashtags']=None
         model.addevent(catalog,event)
 
-
-    file3=cf.data_dir+'sentiment_values.csv'
-    input_file3=csv.DictReader(open(file3, encoding="utf-8"),delimiter=",")
-    for hashtag in input_file3:
-        print(hashtag)
-
     return catalog
 
 def req1(menor,mayor,feature,catalog):
     events=model.numevents(om.values(catalog[feature],menor,mayor))
-    artists=(model.artists(om.values(catalog[feature],menor,mayor)))[0]
+    artists=(model.artists(om.values(catalog[feature],menor,mayor),5))[0]
     print('\n'+feature+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(events)+'\nTotal of unique artists: '+str(artists))
 
 
@@ -111,42 +111,58 @@ def req2(catalog,min1,max1,min2,max2):
         print('Track '+str(n)+': '+ event[0]+' with energy of '+str(event[1])+' and danceability of '+str(event[2]))
     print('\n')
 
+def req3(catalog,min1,max1,min2,max2):
+    keys1=om.values(catalog['instrumentalness'],min1,max1)
+    keys2=om.values(catalog['tempo'],min2,max2)
+    lista1=model.listaconlistas(keys1)
+    final=model.dosfeatures(keys2,lista1)
+    print('\Instrumentalness is between '+str(min1)+' and '+str(max1)+'\Tempo is between '+str(min2)+' and '+str(max2)+'\nTotal of unique tracks in events: '+str(final)+'\n')
+    random=model.random5(catalog,'instrumentalness','tempo',min1,max1,min2,max2)
+    i=it.newIterator(random)
+    n=0
+    print('--- Unique track_id ---')
+    while it.hasNext(i):
+        event=it.next(i)
+        n+=1
+        print('Track '+str(n)+': '+ event[0]+' with instrumentalness of '+str(event[1])+' and tempo of '+str(event[2]))
+    print('\n')
+
 
 def req4(catalog,genre,minimo,maximo):
     if minimo==None:
         if genre=='reggae':
-            menor=60
-            mayor=90
+            menor=60.0
+            mayor=90.0
         elif genre=='down-tempo':
-            menor=70
-            mayor=100
+            menor=70.0
+            mayor=100.0
         elif genre=='chill-out':
-            menor=90
-            mayor=120
+            menor=90.0
+            mayor=120.0
         elif genre=='hip-hop':
-            menor=85
-            mayor=112
+            menor=85.0
+            mayor=115.0
         elif genre=='jazz and funk':
-            menor=120
-            mayor=125
+            menor=120.0
+            mayor=125.0
         elif genre=='pop':
-            menor=100
-            mayor=130
+            menor=100.0
+            mayor=130.0
         elif genre=='r&b':
-            menor=60
-            mayor=80
+            menor=60.0
+            mayor=80.0
         elif genre=='rock':
-            menor=100
-            mayor=140
+            menor=100.0
+            mayor=140.0
         elif genre=='metal':
-            menor=100
-            mayor=160
+            menor=100.0
+            mayor=160.0
     else:
         menor=minimo
         mayor=maximo
 
     eventos=model.numevents(om.values(catalog['tempo'],menor,mayor))
-    y=model.artists(om.values(catalog['tempo'],menor,mayor))
+    y=model.artists(om.values(catalog['tempo'],menor,mayor),10)
     numartists=y[0]
     listartists=y[1]
     print('\n======= '+genre.upper()+' ========'+'\nFor '+genre+' the tempo is between '+str(menor)+' and '+str(mayor)+'\n'+genre+' reproductions: '+str(eventos)+' with '+str(numartists)+' different artists'+'\n\n---- Some artists for '+genre+' -----\n')
@@ -156,6 +172,27 @@ def req4(catalog,genre,minimo,maximo):
         artist=it.next(i)
         print('Artist '+str(n)+': '+artist)
         n+=1
+
+
+def req5(catalog,minim,maxim):
+    x=om.values(catalog['time'],minim,maxim)
+    entry=(lt.firstElement(x))
+    genres=entry['genres']
+    promedios=entry['promedios']
+    print(genres)
+    print(promedios)
+    i=1
+    while i<=lt.size(genres):
+        gens=(lt.getElement(genres,i))
+        print(lt.size(gens))
+        i+=1
+"""        while ite<=lt.size(gens):
+            print(lt.getElement(gens,ite))
+            print(lt.getElement(poms,ite))
+            ite+=1"""
+    
+#    print(mp.size(m))
+
 
 def getTime():
     return float(time.perf_counter()*1000)
