@@ -132,7 +132,7 @@ def req2(catalog,min_en,max_en,min_dan,max_dan):
         event = it.next(i2)
         mp.put(mapafin, event["track_id"],event)
     
-    print('\Energy is between '+str(min_en)+' and '+str(max_en)+'\Danceability is between '+str(min_dan)+' and '+str(max_dan)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
+    print('\nEnergy is between '+str(min_en)+' and '+str(max_en)+'\Danceability is between '+str(min_dan)+' and '+str(max_dan)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -140,7 +140,7 @@ def req2(catalog,min_en,max_en,min_dan,max_dan):
 
     delta_time = stop_time - start_time
     delta_memory = deltaMemory(start_memory, stop_memory)
-
+    print('--- Unique track_id ---')
     n = 1
     listakeys = mp.keySet(mapafin)
     while n<=5:
@@ -172,8 +172,8 @@ def req3(catalog,min_inst,max_inst,min_temp,max_temp):
         event = it.next(i2)
         mp.put(mapafin, event["track_id"],event)
     
-    print('\Instrumentalness is between '+str(min_inst)+' and '+str(max_inst)+'\nTempo is between '+str(min_temp)+' and '+str(max_temp)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
-
+    print('\nInstrumentalness is between '+str(min_inst)+' and '+str(max_inst)+'\nTempo is between '+str(min_temp)+' and '+str(max_temp)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
+    print('--- Unique track_id ---')
     n = 1
     listakeys = mp.keySet(mapafin)
     while n<=5:
@@ -279,6 +279,7 @@ def req5(catalog,minim,maxim):
     print('\nThe TOP GENRE is '+mayor[1].capitalize()+' with '+str(mayor[0])+' reproductions')
     print('========== '+mayor[1].upper()+' SENTIMENT ANALYSIS ==========')
     print(mayor[1].capitalize()+' has '+str(lt.size(tracks))+' unique tracks')
+
     mapafinal=model.numhts(tracks,catalog)
     llavesnumhts=(om.keySet(mapafinal))
     n=it.newIterator(llavesnumhts)
@@ -288,15 +289,18 @@ def req5(catalog,minim,maxim):
         numht=it.next(n)
         listanum.append(numht)
     orderedlistanum=sorted(listanum,reverse=True)
+    centinela=True
     for num in orderedlistanum:
-        while m<=10:
+        if centinela==True:
             partuplas=om.get(mapafinal,num)
             listatuplas=me.getValue(partuplas)
             t=it.newIterator(listatuplas)
-            while it.hasNext(t) and m<=10:
+            while it.hasNext(t) and centinela==True:
                 tupla=it.next(t)
                 print('TOP '+str(m)+' track: '+tupla[0]+' with '+str(num)+' hashtags and VADER = '+str(tupla[1]))
                 m+=1
+                if m>10:
+                    centinela=False
     print('\n')
 
 

@@ -100,8 +100,8 @@ while True:
     elif int(inputs[0])==4:
         minenergy=float(input('Valor inferior energy: '))
         maxenergy=float(input('Valor superior energy: '))
-        mindance=float(input('Valor inferior danceability:'))
-        maxdance=float(input('Valor superior danceability:'))
+        mindance=float(input('Valor inferior danceability: '))
+        maxdance=float(input('Valor superior danceability: '))
         x=controller.req2(catalog,minenergy,maxenergy,mindance,maxdance)
         print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
         input('Presione enter para continuar')
