@@ -107,7 +107,7 @@ def addtomap2(mapa,event,caract):
         pareja=om.get(mapa,llave)
         value = pareja["value"]
         lt.addLast(value["events"], event)
-        lt.addLast(value["artists"], event["artist_id"])
+        mp.put(value["artists"],event["artist_id"],None)
         value["num_events"] += 1
     
     else:
@@ -118,8 +118,8 @@ def entrada(llave,event,caract):
     entry = {"llave":llave,"events":None,"num_events":1,"artists":None}
     entry["events"] = lt.newList(datastructure="ARRAY_LIST")
     lt.addLast(entry["events"], event)
-    entry["artists"] = lt.newList(datastructure="ARRAY_LIST")
-    lt.addLast(entry["artists"], event["artist_id"])
+    entry["artists"] = mp.newMap()
+    mp.put(entry["artists"], event["artist_id"],None)
 
     return entry
 
@@ -170,16 +170,17 @@ def listaeventos(mapa,lista):
     return final
 
 def list_art(lista):
-    final = lt.newList(datastructure="ARRAY_LIST")
+    final=mp.newMap()
     i=it.newIterator(lista)
     while it.hasNext(i):
         key = it.next(i)
-        artistas = key["artists"]
-        ite = it.newIterator(artistas)
-        while it.hasNext(ite):
-            artista = it.next(ite)
-            lt.addLast(final, artista)
-    return final
+        mapa=key["artists"]
+        artists=mp.keySet(mapa)
+        a=it.newIterator(artists)
+        while it.hasNext(a):
+            artist=it.next(a)
+            mp.put(final,artist,None)
+    return mp.size(final)
 
 def listaconlistas(lista):
     uno=lt.firstElement(lista)

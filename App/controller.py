@@ -86,14 +86,7 @@ def req1(menor,mayor,feature,catalog):
 
     events = om.values(catalog[feature],menor,mayor)
     num_events = model.numevents(events)
-    lista_artistas = model.list_art(events)
-    mapa = mp.newMap(maptype="PROBING",loadfactor=0.5)
-
-    i = it.newIterator(lista_artistas)
-    while it.hasNext(i):
-        artist = it.next(i)
-        mp.put(mapa, artist, None)
-    artists = mp.size(mapa)
+    x = model.list_art(events)
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -102,7 +95,7 @@ def req1(menor,mayor,feature,catalog):
     delta_time = stop_time - start_time
     delta_memory = deltaMemory(start_memory, stop_memory)
 
-    print('\n'+(feature.capitalize())+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(num_events)+'\nTotal of unique artists: '+str(artists)+'\n')
+    print('\n'+(feature.capitalize())+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(num_events)+'\nTotal of unique artists: '+str(x)+'\n')
 
     return delta_time, delta_memory
 
