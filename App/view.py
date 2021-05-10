@@ -70,24 +70,34 @@ while True:
     elif int(inputs[0]) == 2:
         catalog=controller.loadData(cont)
         eventos=catalog['eventos']
+        tracks=mp.newMap(numelements=31000)
+        artists=mp.newMap(numelements=11000)
+        i=it.newIterator(eventos)
+        while it.hasNext(i):
+            event=it.next(i)
+            mp.put(tracks,event['track_id'],None)
+            mp.put(artists,event['artist_id'],None)
+
         print('\nSe cargaron '+str(lt.size(eventos))+' eventos de escucha.')
-        print('Se cargaron '+str(mp.size(catalog['tracks']))+' pistas de audio únicas.')
-        print('Se cargaron '+str(mp.size(catalog['artists']))+' artistas únicos.\n')
+        print('Se cargaron '+str(mp.size(tracks))+' pistas de audio únicas.')
+        print('Se cargaron '+str(mp.size(artists))+' artistas únicos.\n')
         print('Información de los 5 primeros eventos\n')
-        i=1
-        while i<=5:
-            evento=lt.getElement(eventos,i)
-            print('('+str(i)+') || track id: '+evento['track_id']+'|| artist id: '+evento['artist_id']+' || user id: '+evento['user_id']+' || instrumentalness: '+evento['instrumentalness']+' || liveness: '+evento['liveness']+' || speechiness: '+evento['speechiness']+' || danceability: '+evento['danceability']+' || valence: '+evento['valence']+' || loudness '+evento['loudness']+' || tempo: '+evento['tempo']+' || acousticness: '+evento['acousticness']+' || energy: '+evento['energy']+'\n')
-            i+=1
+
+        n=1
+        while n<=5:
+            evento=lt.getElement(eventos,n)
+            print('('+str(n)+') || track id: '+evento['track_id']+'|| artist id: '+evento['artist_id']+' || user id: '+evento['user_id']+' || instrumentalness: '+evento['instrumentalness']+' || liveness: '+evento['liveness']+' || speechiness: '+evento['speechiness']+' || danceability: '+evento['danceability']+' || valence: '+evento['valence']+' || loudness '+evento['loudness']+' || tempo: '+evento['tempo']+' || acousticness: '+evento['acousticness']+' || energy: '+evento['energy']+'\n')
+            n+=1
         print('Información de los 5 últimos eventos\n')
+
         m=(lt.size(eventos)-4)
         while m<=lt.size(eventos):
             evento=lt.getElement(eventos,m)
-            print('('+str(i)+') || track id: '+evento['track_id']+'|| artist id: '+evento['artist_id']+' || user id: '+evento['user_id']+' || instrumentalness: '+evento['instrumentalness']+' || liveness: '+evento['liveness']+' || speechiness: '+evento['speechiness']+' || danceability: '+evento['danceability']+' || valence: '+evento['valence']+' || loudness '+evento['loudness']+' || tempo: '+evento['tempo']+' || acousticness: '+evento['acousticness']+' || energy: '+evento['energy']+'\n')
+            print('('+str(n)+') || track id: '+evento['track_id']+'|| artist id: '+evento['artist_id']+' || user id: '+evento['user_id']+' || instrumentalness: '+evento['instrumentalness']+' || liveness: '+evento['liveness']+' || speechiness: '+evento['speechiness']+' || danceability: '+evento['danceability']+' || valence: '+evento['valence']+' || loudness '+evento['loudness']+' || tempo: '+evento['tempo']+' || acousticness: '+evento['acousticness']+' || energy: '+evento['energy']+'\n')
             m+=1
-            i+=1
+            n+=1
         input('Presione enter para continuar')
-
+        
     elif int(inputs[0])==3:
         minimo=float(input('Ingrese el valor mínimo del rango: '))
         maximo=float(input('Ingrese el valor máximo del rango: '))
@@ -103,7 +113,7 @@ while True:
         mindance=float(input('Valor inferior danceability: '))
         maxdance=float(input('Valor superior danceability: '))
         x=controller.req2(catalog,minenergy,maxenergy,mindance,maxdance)
-        print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
+        print("\nTiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
         input('Presione enter para continuar')
 
     elif int(inputs[0])==5:
@@ -111,7 +121,8 @@ while True:
         maxinstrum=float(input('Valor superior instrumentalness: '))
         mintempo=float(input('Valor inferior tempo: '))
         maxtempo=float(input('Valor superior tempo: '))
-        controller.req3(catalog,mininstrum,maxinstrum,mintempo,maxtempo)
+        x=controller.req3(catalog,mininstrum,maxinstrum,mintempo,maxtempo)
+        print("\nTiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
         input('Presione enter para continuar')
     
     elif int(inputs[0])==6:
@@ -161,36 +172,3 @@ while True:
     else:
         sys.exit(0)
 sys.exit(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def comparedates(date1,date2):
-    if date1==date2:
-        return 0
-    elif date1>date2:
-        return 1
-    else:
-        return -1
-
-def cmpgenres(genre1,genre2):
-    return (genre1[1])>=(genre2[1])

@@ -61,7 +61,6 @@ def newCatalog():
     catalog["energy"] = om.newMap(omaptype="RBT")
     catalog["hashtags"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
     catalog['hashtagsportrack']=mp.newMap()
-    catalog['time']=om.newMap()
     return catalog
 
 def addhashtag(catalog,hashtag,vader):
@@ -69,11 +68,8 @@ def addhashtag(catalog,hashtag,vader):
     mp.put(mapa,hashtag,float(vader))
 
 def addevent(catalog,event):
-    addtomap2(catalog["tempo"],event,"tempo")
-    addtime(catalog['time'], event)
-    mp.put(catalog['tracks'],event['track_id'],None)
-    mp.put(catalog['artists'],event['artist_id'],None)
     lt.addLast(catalog['eventos'],event)
+    addtomap2(catalog["tempo"],event,"tempo")
     addtomap2(catalog["energy"],event,"energy")
     addtomap2(catalog["instrumentalness"], event, "instrumentalness")
     addtomap2(catalog["danceability"],event,"danceability")
@@ -81,9 +77,8 @@ def addevent(catalog,event):
     addtomap2(catalog["liveness"],event,"liveness")
     addtomap2(catalog["speechiness"],event,"speechiness")
     addtomap2(catalog["valence"],event,"valence")
-    """
-    addtotime(catalog,event)
-    """
+    addtime(catalog['time'],event)
+
 def addtime(mapa,event):
     info=datetime.datetime.strptime(event['created_at'], '%Y-%m-%d %H:%M:%S')
     time=info.time()
@@ -102,22 +97,31 @@ def entrytime(event):
 
 
 def addtomap2(mapa,event,caract):
+    tupla=(event['track_id'],event['user_id'],event['created_at'])
     llave = float(event[caract])
+    if caract=='danceability':
+            val=(event['energy'],event['danceability'])
+    elif caract=='tempo':
+        val=(event['instrumentalness'],event['tempo'])
+    else:
+        val=None
     if om.contains(mapa,llave):
         pareja=om.get(mapa,llave)
-        value = pareja["value"]
-        lt.addLast(value["events"], event)
-        mp.put(value["artists"],event["artist_id"],None)
-        value["num_events"] += 1
-    
+        entry = pareja["value"]
+        mp.put(entry["events"],tupla,None)
+        mp.put(entry["artists"],event["artist_id"],None)
+        mp.put(entry["tracks"],event['track_id'],val)
+        
     else:
-        entr = entrada(llave,event,caract)
-        om.put(mapa,llave,entr)
+        entry = entrada(llave,tupla,event,caract,val)
+        om.put(mapa,llave,entry)
 
-def entrada(llave,event,caract):
-    entry = {"llave":llave,"events":None,"num_events":1,"artists":None}
-    entry["events"] = lt.newList(datastructure="ARRAY_LIST")
-    lt.addLast(entry["events"], event)
+def entrada(llave,tupla,event,caract,val):
+    entry = {"llave":llave,"events":None,"tracks":None,"artists":None}
+    entry["events"] =mp.newMap()
+    mp.put(entry["events"], tupla,None)
+    entry["tracks"] =mp.newMap()
+    mp.put(entry["tracks"],event['track_id'],val)
     entry["artists"] = mp.newMap()
     mp.put(entry["artists"], event["artist_id"],None)
 
@@ -156,22 +160,47 @@ def promedio(catalog,track):
     else:
         return num,suma/num
         
-def listaeventos(mapa,lista):
-    final = lt.newList(datastructure="ARRAY_LIST")
-    i=it.newIterator(lista)
+def mapaeventos(listadeentries):
+    mapa=mp.newMap()
+    i=it.newIterator(listadeentries)
     while it.hasNext(i):
-        key = it.next(i)
-        eventos = key["events"]
-        ite = it.newIterator(eventos)
-        while it.hasNext(ite):
-            event = it.next(ite)
-            lt.addLast(final, event)
-    
-    return final
+        entry=it.next(i)
+        mapatracks=entry['tracks']
+        tracks=mp.keySet(mapatracks)
+        n=it.newIterator(tracks)
+        while it.hasNext(n):
+            track=it.next(n)
+            mp.put(mapa,track,None)
+    return mapa
 
-def list_art(lista):
+def tracksencomun(mapa,listadeentries):
+    lista=lt.newList()
+    x=1
+    i=it.newIterator(listadeentries)
+    while it.hasNext(i):
+        entry=it.next(i)
+        mapatracks=entry['tracks']
+        tracks=mp.keySet(mapatracks)
+        n=it.newIterator(tracks)
+        while it.hasNext(n):
+            track=it.next(n)
+            if mp.contains(mapa,track)==True:
+                if x<=5:
+                    par=mp.get(mapatracks,track)
+                    val=me.getValue(par)
+                    valor=(track,val)
+                else:
+                    valor=track
+                lt.addLast(lista,valor)
+
+    return lt.size(lista),lt.subList(lista,1,5)
+
+def artists(lista,x):
+    m=1
+    listafinal=lt.newList()
     final=mp.newMap()
     i=it.newIterator(lista)
+
     while it.hasNext(i):
         key = it.next(i)
         mapa=key["artists"]
@@ -180,90 +209,21 @@ def list_art(lista):
         while it.hasNext(a):
             artist=it.next(a)
             mp.put(final,artist,None)
-    return mp.size(final)
+            if x!=None and m<=x:
+                lt.addLast(listafinal,artist)
+                m+=1
 
-def listaconlistas(lista):
-    uno=lt.firstElement(lista)
-    final=uno['tracks']
-    lt.deleteElement(lista,1)
-    i=it.newIterator(lista)
-    while it.hasNext(i):
-        entry=it.next(i)
-        tracks=entry['tracks']
-        ite=it.newIterator(tracks)
-        while it.hasNext(ite):
-            lt.addLast(final,it.next(ite))
-    return final
+    return mp.size(final),listafinal
 
-def dosfeatures(lista,lista2):
-    final=0
-    i=it.newIterator(lista)
-    while it.hasNext(i):
-        entry=it.next(i)
-        tracks=entry['tracks']
-        ite=it.newIterator(tracks)
-        while it.hasNext(ite):
-            track=it.next(ite)
-            if lt.isPresent(lista2,track):
-                final+=1
-    return final
-
-
-def random5(catalog,feat1,feat2,min1,max1,min2,max2):
-    i=it.newIterator(catalog['eventos'])
-    final=lt.newList(datastructure='ARRAY_LIST')
-    c=0
-    while it.hasNext(i) and c<5:
-        evento=it.next(i)
-        if float(evento[feat1])>=min1 and float(evento[feat1])<=max1 and float(evento[feat2])>=min2 and float(evento[feat2])<=max2:
-            c+=1
-            tupla=(evento['track_id'],evento[feat1],evento[feat2])
-            lt.addLast(final,tupla)
-    return final
 
 def numevents(lista):
     final=0
     i=it.newIterator(lista)
     while it.hasNext(i):
         entry=it.next(i)
-        num=entry['num_events']
-        final+=num
+        num=entry['events']
+        final+=mp.size(num)
     return final
-
-def artists(lista,x):
-    lfinal=lt.newList(datastructure="ARRAY_LIST")
-    entry1=lt.firstElement(lista)
-    final=entry1['artists']
-    lt.deleteElement(lista,1)
-    i=it.newIterator(lista)
-    while it.hasNext(i):
-        entry=it.next(i)
-        artists=entry['artists']
-        ite=it.newIterator(artists)
-        while it.hasNext(ite):
-            artist=it.next(ite)
-            if lt.isPresent(final,artist)==0:
-                lt.addLast(final,artist)
-    i=1
-    while i<=x:
-        lt.addLast(lfinal,lt.getElement(final,i))
-        i+=1
-    return lt.size(final),lfinal
-
-def tenartists(lista):
-    final=lt.newList()
-    n=0
-    i=it.newIterator(lista)
-    while it.hasNext(i) and n<10:
-        entry=it.next(i)
-        artists=entry['artists']
-        ite=it.newIterator(artists)
-        while it.hasNext(ite) and n<10:
-            artist=it.next(ite)
-            lt.addLast(final,artist)
-            n+=1
-    return final
-
 
 def genresbytempo(num):
     genres=lt.newList()
@@ -336,6 +296,36 @@ def numhts(tracks,catalog):
                 lt.addLast(lista,(track,prom))
                 om.put(mapafinal,numht,lista)
     return mapafinal
+
+def tempobygenre(genre):
+    if genre=='reggae':
+            menor=60.0
+            mayor=90.0
+    elif genre=='down-tempo':
+        menor=70.0
+        mayor=100.0
+    elif genre=='chill-out':
+        menor=90.0
+        mayor=120.0
+    elif genre=='hip-hop':
+        menor=85.0
+        mayor=115.0
+    elif genre=='jazz and funk':
+        menor=120.0
+        mayor=125.0
+    elif genre=='pop':
+        menor=100.0
+        mayor=130.0
+    elif genre=='r&b':
+        menor=60.0
+        mayor=80.0
+    elif genre=='rock':
+        menor=110.0
+        mayor=140.0
+    elif genre=='metal':
+        menor=100.0
+        mayor=160.0
+    return menor,mayor
 """# Funciones para agregar informacion al catalogo
 # Funciones utilizadas para comparar elementos dentro de una lista
 

@@ -86,7 +86,7 @@ def req1(menor,mayor,feature,catalog):
 
     events = om.values(catalog[feature],menor,mayor)
     num_events = model.numevents(events)
-    x = model.list_art(events)
+    num_artists = (model.artists(events,None))[0]
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -95,7 +95,7 @@ def req1(menor,mayor,feature,catalog):
     delta_time = stop_time - start_time
     delta_memory = deltaMemory(start_memory, stop_memory)
 
-    print('\n'+(feature.capitalize())+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(num_events)+'\nTotal of unique artists: '+str(x)+'\n')
+    print('\n'+(feature.capitalize())+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(num_events)+'\nTotal of unique artists: '+str(num_artists)+'\n')
 
     return delta_time, delta_memory
 
@@ -107,25 +107,22 @@ def req2(catalog,min_en,max_en,min_dan,max_dan):
     start_time = getTime()
     start_memory = getMemory()
 
-    keys1 = om.values(catalog["energy"],min_en,max_en)
-    lista1 = model.listaeventos(catalog["energy"],keys1)
-    mapa = om.newMap(omaptype="RBT")
-
-    i1 = it.newIterator(lista1)
-    while it.hasNext(i1):
-        event = it.next(i1)
-        model.addtomap2(mapa, event,"danceability")
-
-    keys2 = om.values(mapa,min_dan,max_dan)
-    lista2 = model.listaeventos(mapa,keys2)
-
-    mapafin = mp.newMap(maptype="PROBING",loadfactor=0.5)
-    i2 = it.newIterator(lista2)
-    while it.hasNext(i2):
-        event = it.next(i2)
-        mp.put(mapafin, event["track_id"],event)
-    
-    print('\nEnergy is between '+str(min_en)+' and '+str(max_en)+'\Danceability is between '+str(min_dan)+' and '+str(max_dan)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
+    listadeentries1 = om.values(catalog["energy"],min_en,max_en)
+    mapa1 = model.mapaeventos(listadeentries1)
+    listadeentries2=om.values(catalog["danceability"],min_dan,max_dan)
+    tracksencomun=model.tracksencomun(mapa1,listadeentries2)
+    print('\nEnergy is between '+str(min_en)+' and '+str(max_en))
+    print('Danceability is between '+str(min_dan)+' and '+str(max_dan))
+    print('Total of unique tracks in events: '+str(tracksencomun[0]))
+    print('\n--- Unique track_id ---')
+    lista=tracksencomun[1]
+    i=it.newIterator(lista)
+    x=1
+    while it.hasNext(i):
+        tupla=it.next(i)
+        features=tupla[1]
+        print('Track '+str(x)+': '+tupla[0]+' with energy of '+str(features[0])+' and danceability of '+str(features[1]))
+        x+=1
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -133,107 +130,69 @@ def req2(catalog,min_en,max_en,min_dan,max_dan):
 
     delta_time = stop_time - start_time
     delta_memory = deltaMemory(start_memory, stop_memory)
-    print('--- Unique track_id ---')
-    n = 1
-    listakeys = mp.keySet(mapafin)
-    while n<=5:
-        llave = lt.getElement(listakeys, n)
-        event = mp.get(mapafin,llave)["value"]
-
-        print('Track '+str(n)+': '+ event["track_id"]+' with energy of '+str(event["energy"])+' and danceability of '+str(event["danceability"]))
-        n +=1
-    print('\n')
 
     return delta_time, delta_memory
 
+
 def req3(catalog,min_inst,max_inst,min_temp,max_temp):
-    keys1 = om.values(catalog["tempo"],min_temp,max_temp)
-    lista1 = model.listaeventos(catalog["tempo"],keys1)
-    mapa = om.newMap(omaptype="RBT")
+    delta_time = -1.0
+    delta_memory = -1.0
 
-    i1 = it.newIterator(lista1)
-    while it.hasNext(i1):
-        event = it.next(i1)
-        model.addtomap2(mapa, event,"instrumentalness")
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
 
-    keys2 = om.values(mapa,min_inst,max_inst)
-    lista2 = model.listaeventos(mapa,keys2)
+    listadeentries1 = om.values(catalog['instrumentalness'],min_inst,max_inst)
+    mapa1 = model.mapaeventos(listadeentries1)
+    listadeentries2=om.values(catalog['tempo'],min_temp,max_temp)
+    tracksencomun=model.tracksencomun(mapa1,listadeentries2)
+    print('\Instrumentalness is between '+str(min_inst)+' and '+str(max_inst))
+    print('Tempo is between '+str(min_temp)+' and '+str(max_temp))
+    print('Total of unique tracks in events: '+str(tracksencomun[0]))
+    print('\n--- Unique track_id ---')
+    lista=tracksencomun[1]
+    i=it.newIterator(lista)
+    x=1
+    while it.hasNext(i):
+        tupla=it.next(i)
+        features=tupla[1]
+        print('Track '+str(x)+': '+tupla[0]+' with instrumentalness of '+str(features[0])+' and tempo of '+str(features[1]))
+        x+=1
 
-    mapafin = mp.newMap(maptype="PROBING",loadfactor=0.5)
-    i2 = it.newIterator(lista2)
-    while it.hasNext(i2):
-        event = it.next(i2)
-        mp.put(mapafin, event["track_id"],event)
-    
-    print('\nInstrumentalness is between '+str(min_inst)+' and '+str(max_inst)+'\nTempo is between '+str(min_temp)+' and '+str(max_temp)+'\nTotal of unique tracks in events: '+str(mp.size(mapafin))+'\n')
-    print('--- Unique track_id ---')
-    n = 1
-    listakeys = mp.keySet(mapafin)
-    while n<=5:
-        llave = lt.getElement(listakeys, n)
-        event = mp.get(mapafin,llave)["value"]
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
 
-        print('Track '+str(n)+': '+ event["track_id"]+' with instrumentalness of '+str(event["instrumentalness"])+' and tempo of '+str(event["tempo"]))
-        n +=1
-    print('\n')
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return delta_time, delta_memory
 
 
 def req4(catalog,genre,minimo,maximo):
-
     mapa = catalog["tempo"]
+
     if minimo==None and maximo==None:
-        if genre=='reggae':
-            menor=60.0
-            mayor=90.0
-        elif genre=='down-tempo':
-            menor=70.0
-            mayor=100.0
-        elif genre=='chill-out':
-            menor=90.0
-            mayor=120.0
-        elif genre=='hip-hop':
-            menor=85.0
-            mayor=115.0
-        elif genre=='jazz and funk':
-            menor=120.0
-            mayor=125.0
-        elif genre=='pop':
-            menor=100.0
-            mayor=130.0
-        elif genre=='r&b':
-            menor=60.0
-            mayor=80.0
-        elif genre=='rock':
-            menor=110.0
-            mayor=140.0
-        elif genre=='metal':
-            menor=100.0
-            mayor=160.0
+        x=model.tempobygenre(genre)
+        menor=x[0]
+        mayor=x[1]
     else:
         menor=minimo
         mayor=maximo
 
     events = om.values(mapa,menor,mayor)
     num_events = model.numevents(events)
-    lista_artistas = model.list_art(events)
-    mapa = mp.newMap(maptype="PROBING",loadfactor=0.5)
+    artists=(model.artists(events,10))
+    numartists=artists[0]
+    listartists=artists[1]
 
-    i = it.newIterator(lista_artistas)
-    while it.hasNext(i):
-        artist = it.next(i)
-        mp.put(mapa, artist, None)
-    artists = mp.size(mapa)
-
-    listartists=mp.keySet(mapa)
-
-    print('\n======= '+genre.upper()+' ========'+'\nFor '+genre+' the tempo is between '+str(menor)+' and '+str(mayor)+'\n'+genre+' reproductions: '+str(num_events)+' with '+str(artists)+' different artists'+'\n\n---- Some artists for '+genre+' -----\n')
+    print('\n======= '+genre.upper()+' ========'+'\nFor '+genre+' the tempo is between '+str(menor)+' and '+str(mayor)+'\n'+genre+' reproductions: '+str(num_events)+' with '+str(numartists)+' different artists'+'\n\n---- Some artists for '+genre+' -----\n')
     i=it.newIterator(listartists)
     n=1
-    while it.hasNext(i) and n<=5:
+    while it.hasNext(i):
         artist=it.next(i)
         print('Artist '+str(n)+': '+artist)
         n+=1
-
 
 
 def req5(catalog,minim,maxim):
@@ -297,151 +256,6 @@ def req5(catalog,minim,maxim):
     print('\n')
 
 
-"""    mapa=catalog['hashtagsportrack']
-    m=1
-    print('10 of these tracks are...')
-    while it.hasNext(d) and m<=10:
-        track=it.next(d)
-        par=mp.get(mapa,track)
-        hts=me.getValue(par)
-        nums=model.promedio(catalog,hts)
-        if nums!=None:
-            print('Track '+str(m)+': '+track+' with '+str(nums[1])+' hashtags and VADER = '+str(nums[0]/nums[1]))
-            m+=1
-    print('\n')"""
-
-
-
-"""
-def req5prueba(catalog,minim,maxim):
-   lista=om.values(catalog['time'],minim,maxim)
-   mapa_tempo = om.newMap(omaptype="RBT")
-   i1 = it.newIterator(lista)
-   reproducciones = 0
-   while it.hasNext(i1):
-    entrada = it.next(i1)
-    events = entrada["events"]
-
-    i2 = it.newIterator(events)
-    while it.hasNext(i2):
-        event = it.next(i2)
-        model.addtomap2(mapa_tempo,event,"tempo")
-        reproducciones += 1
-   
-   lista_a_sortear = lt.newList("ARRAY_LIST")
-   lista=("reggae, down-tempo, chill-out, hip-hop, jazz and funk, pop, r&b, rock, metal".lower()).split(', ')
-   for genre in lista:
-       lt.addLast(lista_a_sortear, auxiliar(catalog,genre,None,None,"req5",mapa_tempo))
-
-   mrge.sort(lista_a_sortear, cmpgenres)
-   m = 1
-   suma = 0
-   while m<=9:
-       ele = lt.getElement(lista_a_sortear, m)
-       suma += ele[1]
-       m+=1
-
-   print("There is a total of " + str(suma) + +" reproductions between"+ str(minim) +" and "+ str(maxim))
-
-   n = 1
-   while n<=9:
-       ele = lt.getElement(lista_a_sortear, n)
-       print("TOP " + str(n) + ": " + str(ele[0]) + " with " + str(ele[1]) + " reps")
-       n+=1
-   genre = lt.getElement(lista_a_sortear, 1) 
-   if genre=='reggae':
-        menor=60.0
-        mayor=90.0
-   elif genre=='down-tempo':
-        menor=70.0
-        mayor=100.0
-   elif genre=='chill-out':
-        menor=90.0
-        mayor=120.0
-   elif genre=='hip-hop':
-        menor=85.0
-        mayor=115.0
-   elif genre=='jazz and funk':
-        menor=120.0
-        mayor=125.0
-   elif genre=='pop':
-        menor=100.0
-        mayor=130.0
-   elif genre=='r&b':
-        menor=60.0
-        mayor=80.0
-   elif genre=='rock':
-        menor=110.0
-        mayor=140.0
-   elif genre=='metal':
-        menor=100.0
-        mayor=160.0
-  
-   lista_mayor = om.values(mapa_tempo,menor,mayor)
-   lista_eventos = model.listaeventos(mapa_tempo, lista_mayor)
-
-   mapa_trac = mp.newMap(maptype="PROBING",loadfactor=0.5)
-   i3 = it.newIterator(lista_eventos)
-   while it.hasNext(i3):
-       evento = it.next(i3)
-       mp.put(mapa_trac,evento["track_id"],None)
-   
-   tracks_unicos = mp.keySet(mapa_trac)
-
-
-
-    
-
-
-def auxiliar(catalog,genre,minimo,maximo,req,mapa):
-    if req == "req5":
-        mapa = mapa
-    else: 
-        mapa = catalog["tempo"]
-    menor = None
-    mayor = None
-    if minimo==None and maximo==None:
-        if genre=='reggae':
-            menor=60.0
-            mayor=90.0
-        elif genre=='down-tempo':
-            menor=70.0
-            mayor=100.0
-        elif genre=='chill-out':
-            menor=90.0
-            mayor=120.0
-        elif genre=='hip-hop':
-            menor=85.0
-            mayor=115.0
-        elif genre=='jazz and funk':
-            menor=120.0
-            mayor=125.0
-        elif genre=='pop':
-            menor=100.0
-            mayor=130.0
-        elif genre=='r&b':
-            menor=60.0
-            mayor=80.0
-        elif genre=='rock':
-            menor=110.0
-            mayor=140.0
-        elif genre=='metal':
-            menor=100.0
-            mayor=160.0
-    else:
-        menor=minimo
-        mayor=maximo
-
-    events = om.values(mapa,menor,mayor)
-    num_events = model.numevents(events)
-    return (genre,num_events)
-
-
-    
-    
-#    print(mp.size(m))
-
-"""
 def getTime():
     return float(time.perf_counter()*1000)
 
@@ -467,14 +281,3 @@ def deltaMemory(start_memory, stop_memory):
     # de Byte -> kByte
     delta_memory = delta_memory/1024.0
     return delta_memory
-
-def comparedates(date1,date2):
-    if date1==date2:
-        return 0
-    elif date1>date2:
-        return 1
-    else:
-        return -1
-
-def cmpgenres(genre1,genre2):
-    return (genre1[1])>=(genre2[1])
