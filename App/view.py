@@ -69,13 +69,32 @@ while True:
 
     elif int(inputs[0]) == 2:
         catalog=controller.loadData(cont)
-        
+        eventos=catalog['eventos']
+        print('\nSe cargaron '+str(lt.size(eventos))+' eventos de escucha.')
+        print('Se cargaron '+str(mp.size(catalog['tracks']))+' pistas de audio únicas.')
+        print('Se cargaron '+str(mp.size(catalog['artists']))+' artistas únicos.\n')
+        print('Información de los 5 primeros eventos\n')
+        i=1
+        while i<=5:
+            evento=lt.getElement(eventos,i)
+            print('('+str(i)+') || track id: '+evento['track_id']+'|| artist id: '+evento['artist_id']+' || user id: '+evento['user_id']+' || instrumentalness: '+evento['instrumentalness']+' || liveness: '+evento['liveness']+' || speechiness: '+evento['speechiness']+' || danceability: '+evento['danceability']+' || valence: '+evento['valence']+' || loudness '+evento['loudness']+' || tempo: '+evento['tempo']+' || acousticness: '+evento['acousticness']+' || energy: '+evento['energy']+'\n')
+            i+=1
+        print('Información de los 5 últimos eventos\n')
+        m=(lt.size(eventos)-4)
+        while m<=lt.size(eventos):
+            evento=lt.getElement(eventos,m)
+            print('('+str(i)+') || track id: '+evento['track_id']+'|| artist id: '+evento['artist_id']+' || user id: '+evento['user_id']+' || instrumentalness: '+evento['instrumentalness']+' || liveness: '+evento['liveness']+' || speechiness: '+evento['speechiness']+' || danceability: '+evento['danceability']+' || valence: '+evento['valence']+' || loudness '+evento['loudness']+' || tempo: '+evento['tempo']+' || acousticness: '+evento['acousticness']+' || energy: '+evento['energy']+'\n')
+            m+=1
+            i+=1
+        input('Presione enter para continuar')
+
     elif int(inputs[0])==3:
         minimo=float(input('Ingrese el valor mínimo del rango: '))
         maximo=float(input('Ingrese el valor máximo del rango: '))
         feature=input('Ingrese la característica de contenido: ')
-        x = controller.req1(minimo,maximo,feature.lower(),catalog)
-        print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}")
+        x=controller.req1(minimo,maximo,feature.lower(),catalog)
+        print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
+        input('Presione enter para continuar')
        
 
     elif int(inputs[0])==4:
@@ -83,8 +102,9 @@ while True:
         maxenergy=float(input('Valor superior energy: '))
         mindance=float(input('Valor inferior danceability:'))
         maxdance=float(input('Valor superior danceability:'))
-        x = controller.req2(catalog,minenergy,maxenergy,mindance,maxdance)
-        print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}")
+        x=controller.req2(catalog,minenergy,maxenergy,mindance,maxdance)
+        print("Tiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
+        input('Presione enter para continuar')
 
     elif int(inputs[0])==5:
         mininstrum=float(input('Valor inferior instrumentalness: '))
@@ -92,6 +112,7 @@ while True:
         mintempo=float(input('Valor inferior tempo: '))
         maxtempo=float(input('Valor superior tempo: '))
         controller.req3(catalog,mininstrum,maxinstrum,mintempo,maxtempo)
+        input('Presione enter para continuar')
     
     elif int(inputs[0])==6:
         delta_time = -1.0
@@ -106,7 +127,7 @@ while True:
             genres=input('¿Cuáles? [escríbalos separados por una coma y espacio. Ej: reggae, hip-hop]: ')
             lista=(genres.lower()).split(', ')
             for genre in lista:
-                controller.req4(catalog,genre,None,None,None,None)
+                controller.req4(catalog,genre,None,None)
             print('\n')
         y=int(input('¿Desea conocer información sobre un género no existente? [0: sí // 1: no]: '))
         if y==0:
@@ -122,14 +143,18 @@ while True:
 
         delta_time = stop_time - start_time
         delta_memory = controller.deltaMemory(start_memory, stop_memory)
-        print("Tiempo [ms]: "+f"{delta_time:.3f}"+" ||  "+"Memoria [kB]: "+f"{delta_memory:.3f}")
+        print("Tiempo [ms]: "+f"{delta_time:.3f}"+" ||  "+"Memoria [kB]: "+f"{delta_memory:.3f}"+'\n')
+        input('Presione enter para continuar')
 
     elif int(inputs[0])==7:
-        x='7:15:00'
+        x=input('Ingrese la hora mínima del rango [en formato H:MM:SS Ej: 0:00:00]: ')
         info=datetime.datetime.strptime(x,'%H:%M:%S')
-        y='9:45:00'
+        time1=info.time()
+        y=input('Ingrese la hora máxima del rango [en formato H:MM:SS Ej: 0:00:00]: ')
         info1=datetime.datetime.strptime(y,'%H:%M:%S')
-        controller.req5(catalog,info,info1)
+        time2=info1.time()
+        controller.req5(catalog,time1,time2)
+        input('Presione enter para continuar')
 
 
 

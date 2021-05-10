@@ -56,7 +56,7 @@ def loadData(catalog):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    """
+    
     file3=cf.data_dir+'sentiment_values.csv'
     input_file3=csv.DictReader(open(file3, encoding="utf-8"),delimiter=",")
     for hashtag in input_file3:
@@ -65,31 +65,13 @@ def loadData(catalog):
 
     file1=cf.data_dir+'user_track_hashtag_timestamp-small.csv'
     input_file1 = csv.DictReader(open(file1, encoding="utf-8"),delimiter=",")
-    mapa=mp.newMap(maptype="PROBING",loadfactor=0.5)
     for event in input_file1:
-        llave=(event['track_id'],event['user_id'],event['created_at'])
-        if mp.contains(mapa,llave):
-            pareja=mp.get(mapa,llave)
-            lista=me.getValue(pareja)
-            lt.addLast(lista,event['hashtag'])
-        else:
-            lista=lt.newList()
-            lt.addLast(lista,event['hashtag'])
-            mp.put(mapa,llave,lista)
-"""
+        model.addpromtrack(catalog,event)
+
     file2=cf.data_dir + 'context_content_features-small.csv'
     input_file2 = csv.DictReader(open(file2, encoding="utf-8"),delimiter=",")
     
     for event in input_file2:
-        """
-        llave=(event['track_id'],event['user_id'],event['created_at'])
-        if mp.contains(mapa,llave):
-            pareja=mp.get(mapa,llave)
-            hashtags=me.getValue(pareja)
-            event['hashtags']=hashtags
-        else:
-            event['hashtags']=None
-        """
         model.addevent(catalog,event)
 
     return catalog
@@ -120,7 +102,7 @@ def req1(menor,mayor,feature,catalog):
     delta_time = stop_time - start_time
     delta_memory = deltaMemory(start_memory, stop_memory)
 
-    print('\n'+feature+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(num_events)+'\nTotal of unique artists: '+str(artists))
+    print('\n'+(feature.capitalize())+' is between '+str(menor)+' and '+str(mayor)+'\nTotal of reproduction: '+str(num_events)+'\nTotal of unique artists: '+str(artists)+'\n')
 
     return delta_time, delta_memory
 
@@ -203,16 +185,9 @@ def req3(catalog,min_inst,max_inst,min_temp,max_temp):
     print('\n')
 
 
+def req4(catalog,genre,minimo,maximo):
 
-def req4(catalog,genre,minimo,maximo,req,mapa):
-
-
-    if req == "req5":
-        mapa = mapa
-    else: 
-        mapa = catalog["tempo"]
-    menor = None
-    mayor = None
+    mapa = catalog["tempo"]
     if minimo==None and maximo==None:
         if genre=='reggae':
             menor=60.0
@@ -265,6 +240,79 @@ def req4(catalog,genre,minimo,maximo,req,mapa):
         artist=it.next(i)
         print('Artist '+str(n)+': '+artist)
         n+=1
+
+
+
+def req5(catalog,minim,maxim):
+    mapa=mp.newMap()
+    total=0
+    mayor=None
+    uniques=[]
+    tuplas=[]
+    lista=om.values(catalog['time'],minim,maxim)
+    mapa=model.genresandtracks(lista)
+    keys=mp.keySet(mapa)
+    i=it.newIterator(keys)
+    while it.hasNext(i):
+        key=it.next(i)
+        x=mp.get(mapa,key)
+        entry=me.getValue(x)
+        unique=mp.size(entry['unique'])
+        uniques.append(unique)
+        total+=unique
+        tupla=unique,key
+        tuplas.append(tupla)
+    x=sorted(uniques,reverse=True)
+    print('\nThere is a total of '+str(total)+' reproductions between '+str(minim)+' and '+str(maxim))
+    print('========== GENRES SORTED REPRODUCTIONS ==========')
+    i=1
+    for num in x:
+        for tupla in tuplas:
+            if tupla[0]==num:
+                print('TOP '+str(i)+': '+tupla[1].capitalize()+' with '+str(num)+' reps')
+                if i==1:
+                    mayor=tupla
+                i+=1
+    pareja=mp.get(mapa,mayor[1])
+    entry=me.getValue(pareja)
+    tracks=mp.keySet(entry['tracks'])
+    print('\nThe TOP GENRE is '+mayor[1].capitalize()+' with '+str(mayor[0])+' reproductions')
+    print('========== '+mayor[1].upper()+' SENTIMENT ANALYSIS ==========')
+    print(mayor[1].capitalize()+' has '+str(lt.size(tracks))+' unique tracks')
+    mapafinal=model.numhts(tracks,catalog)
+    llavesnumhts=(om.keySet(mapafinal))
+    n=it.newIterator(llavesnumhts)
+    listanum=[]
+    m=1
+    while it.hasNext(n):
+        numht=it.next(n)
+        listanum.append(numht)
+    orderedlistanum=sorted(listanum,reverse=True)
+    for num in orderedlistanum:
+        while m<=10:
+            partuplas=om.get(mapafinal,num)
+            listatuplas=me.getValue(partuplas)
+            t=it.newIterator(listatuplas)
+            while it.hasNext(t) and m<=10:
+                tupla=it.next(t)
+                print('TOP '+str(m)+' track: '+tupla[0]+' with '+str(num)+' hashtags and VADER = '+str(tupla[1]))
+                m+=1
+    print('\n')
+
+
+"""    mapa=catalog['hashtagsportrack']
+    m=1
+    print('10 of these tracks are...')
+    while it.hasNext(d) and m<=10:
+        track=it.next(d)
+        par=mp.get(mapa,track)
+        hts=me.getValue(par)
+        nums=model.promedio(catalog,hts)
+        if nums!=None:
+            print('Track '+str(m)+': '+track+' with '+str(nums[1])+' hashtags and VADER = '+str(nums[0]/nums[1]))
+            m+=1
+    print('\n')"""
+
 
 
 """
