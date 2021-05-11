@@ -273,6 +273,13 @@ def req5(catalog,minim,maxim):
                 centinela=False
 
     print('\n')
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+    
     return delta_time, delta_memory
 
 
