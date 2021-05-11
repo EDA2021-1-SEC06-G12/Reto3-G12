@@ -262,7 +262,7 @@ def req5(catalog,minim,maxim):
     d=it.newIterator(mergednums)
     while it.hasNext(d) and centinela==True:
         num=it.next(d)
-        par=mp.get(mapafinal,num)
+        par=mp.get(mapanums,num)
         listatuplas=me.getValue(par)
         t=it.newIterator(listatuplas)
         while it.hasNext(t) and centinela==True:
@@ -271,7 +271,7 @@ def req5(catalog,minim,maxim):
             m+=1
             if m>10:
                 centinela=False
-                
+
     print('\n')
 
 
