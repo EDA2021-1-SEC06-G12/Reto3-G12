@@ -47,8 +47,8 @@ def newCatalog():
     """
     catalog = {'eventos':None,'energy':None,'instrumentalness':None,'danceability':None,'tempo':None,'acousticness':None,'hashtags':None,'time':None}
     catalog['eventos']=lt.newList(datastructure="ARRAY_LIST")
-    catalog['tracks']=mp.newMap()
-    catalog['artists']=mp.newMap()
+    catalog['tracks']=mp.newMap(maptype="PROBING",loadfactor=0.5)
+    catalog['artists']=mp.newMap(maptype="PROBING",loadfactor=0.5)
     catalog['energy']=om.newMap(omaptype="RBT")
     catalog['instrumentalness']=om.newMap(omaptype="RBT")
     catalog['danceability']=om.newMap(omaptype="RBT")
@@ -60,7 +60,7 @@ def newCatalog():
     catalog['time']=om.newMap(omaptype="RBT")
     catalog["energy"] = om.newMap(omaptype="RBT")
     catalog["hashtags"] = mp.newMap(maptype="PROBING",loadfactor=0.5)
-    catalog['hashtagsportrack']=mp.newMap()
+    catalog['hashtagsportrack']=mp.newMap(maptype="PROBING",loadfactor=0.5)
     return catalog
 
 def addhashtag(catalog,hashtag,vader):
@@ -87,7 +87,7 @@ def addtime(mapa,event):
         lista=me.getValue(pareja)
         lt.addLast(lista,entrytime(event))
     else:
-        lista=lt.newList()
+        lista=lt.newList(datastructure="ARRAY_LIST")
         lt.addLast(lista,entrytime(event))
         om.put(mapa,time,lista)
 
@@ -137,7 +137,7 @@ def addpromtrack(catalog,event):
         if lt.isPresent(lista,event['hashtag'])==0:
             lt.addLast(lista,event['hashtag'])
     else:
-        lista=lt.newList()
+        lista=lt.newList(datastructure="ARRAY_LIST")
         lt.addLast(lista,event['hashtag'])
         mp.put(mapa,track,lista)
     
@@ -161,7 +161,7 @@ def promedio(catalog,track):
         return num,suma/num
         
 def mapaeventos(listadeentries):
-    mapa=mp.newMap()
+    mapa=mp.newMap(maptype="PROBING",loadfactor=0.5)
     i=it.newIterator(listadeentries)
     while it.hasNext(i):
         entry=it.next(i)
@@ -174,7 +174,7 @@ def mapaeventos(listadeentries):
     return mapa
 
 def tracksencomun(mapa,listadeentries):
-    lista=lt.newList()
+    lista=lt.newList(datastructure="ARRAY_LIST")
     x=1
     i=it.newIterator(listadeentries)
     while it.hasNext(i):
@@ -197,8 +197,8 @@ def tracksencomun(mapa,listadeentries):
 
 def artists(lista,x):
     m=1
-    listafinal=lt.newList()
-    final=mp.newMap()
+    listafinal=lt.newList(datastructure="ARRAY_LIST")
+    final=mp.newMap(maptype="PROBING",loadfactor=0.5)
     i=it.newIterator(lista)
 
     while it.hasNext(i):
@@ -226,7 +226,7 @@ def numevents(lista):
     return final
 
 def genresbytempo(num):
-    genres=lt.newList()
+    genres=lt.newList(datastructure="ARRAY_LIST")
     if num>=100 and num<=160:
         lt.addLast(genres,'metal')
         if num>=110 and num<=140:
@@ -292,7 +292,7 @@ def numhts(tracks,catalog):
                 lista=me.getValue(par)
                 lt.addLast(lista,(track,prom))
             else:
-                lista=lt.newList()
+                lista=lt.newList(datastructure="ARRAY_LIST")
                 lt.addLast(lista,(track,prom))
                 om.put(mapafinal,numht,lista)
     return mapafinal

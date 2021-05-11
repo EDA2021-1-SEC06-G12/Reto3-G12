@@ -170,6 +170,7 @@ def req3(catalog,min_inst,max_inst,min_temp,max_temp):
 
 
 def req4(catalog,genre,minimo,maximo):
+ 
     mapa = catalog["tempo"]
 
     if minimo==None and maximo==None:
@@ -193,10 +194,12 @@ def req4(catalog,genre,minimo,maximo):
         artist=it.next(i)
         print('Artist '+str(n)+': '+artist)
         n+=1
+    
+   
 
 
 def req5(catalog,minim,maxim):
-    mapa=mp.newMap()
+    mapa=mp.newMap(maptype="PROBING",loadfactor=0.5)
     total=0
     mayor=None
     uniques=[]
