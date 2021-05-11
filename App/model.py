@@ -77,34 +77,8 @@ def addevent(catalog,event):
     addtomap1(catalog["liveness"],event,tupla,"liveness")
     addtomap1(catalog["speechiness"],event,tupla,"speechiness")
     addtomap1(catalog["valence"],event,tupla,"valence")
-#    addtime(catalog['time'],event)
-    addtotiempo(catalog,event,tupla)
+    addtime(catalog['time'],event)
 
-
-def addtotiempo(catalog,event,tupla):
-    mapa=catalog['tiempo']
-    info=datetime.datetime.strptime(event['created_at'], '%Y-%m-%d %H:%M:%S')
-    llave=info.time()
-    genres=genresbytempo(float(event['tempo']))
-    i=it.newIterator(genres)
-    par=om.get(mapa,llave)
-    if par!=None:
-        entry=me.getValue(par)
-        while it.hasNext(i):
-            genero=it.next(i)
-            mp.put(entry[genero],tupla,promedio(catalog,event['track_id']))
-    else:
-        entry=entriestiempo(catalog,llave,tupla,event['track_id'],genres)
-        om.put(mapa,llave,entry)
-
-
-def entriestiempo(catalog,llave,tupla,track,genres):
-    entry={'llave':llave,'reggae':mp.newMap(),'down-tempo':mp.newMap(),'chill-out':mp.newMap(),'hip-hop':mp.newMap(),'jazz and funk':mp.newMap(),'pop':mp.newMap(),'r&b':mp.newMap(),'rock':mp.newMap(),'metal':mp.newMap()}
-    i=it.newIterator(genres)
-    while it.hasNext(i):
-        genre=it.next(i)
-        mp.put(entry[genre],tupla,promedio(catalog,track))
-    return entry
 
 def addtime(mapa,event):
     info=datetime.datetime.strptime(event['created_at'], '%Y-%m-%d %H:%M:%S')
@@ -118,8 +92,9 @@ def addtime(mapa,event):
         lt.addLast(lista,entrytime(event))
         om.put(mapa,time,lista)
 
+
 def entrytime(event):
-    entry={'track_id':event['track_id'],'tupla':(event['track_id'],event['user_id'],event['created_at']),'genres':genresbytempo(float(event['tempo']))}
+    entry={'tupla':(event['track_id'],event['user_id'],event['created_at']),'genres':genresbytempo(float(event['tempo']))}
     return entry
 
 
@@ -302,7 +277,6 @@ def genresandtracks(lista):
         v=it.newIterator(events)
         while it.hasNext(v):
             event=it.next(v)
-            track=event['track_id']
             tupla=event['tupla']
             genres=event['genres']
             w=it.newIterator(genres)
@@ -311,18 +285,16 @@ def genresandtracks(lista):
                 x=mp.get(mapa,genre)
                 if x!=None:
                     entry=me.getValue(x)
-                    mp.put(entry['unique'],tupla,None)
-                    mp.put(entry['tracks'],track,None)
+                    mp.put(entry['events'],tupla,None)
                 else:
-                    val=entrygt(genre,tupla,track)
-                    mp.put(mapa,genre,val)
+                    entry=entrygt(genre,tupla)
+                    mp.put(mapa,genre,entry)
 
     return mapa
 
 def entrygt(genre,tupla,track):
-    entry={'genre':genre,'unique':mp.newMap(),'tracks':mp.newMap()}
-    mp.put(entry['unique'],tupla,None)
-    mp.put(entry['tracks'],track,None)
+    entry={'genre':genre,'events':mp.newMap()}
+    mp.put(entry['events'],tupla,None)
     return entry
 
 def numhts(tracks,catalog):

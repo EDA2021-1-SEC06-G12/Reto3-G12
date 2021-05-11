@@ -209,24 +209,37 @@ def req5(catalog,minim,maxim):
     start_memory = getMemory()
 
     mapa=mp.newMap(maptype="PROBING",loadfactor=0.5)
+    mapafinal=mp.newMap()
     total=0
     mayor=None
-    uniques=[]
-    tuplas=[]
     lista=om.values(catalog['time'],minim,maxim)
     mapa=model.genresandtracks(lista)
-    keys=mp.keySet(mapa)
-    i=it.newIterator(keys)
+    genres=mp.keySet(mapa)
+    i=it.newIterator(genres)
+    while it.hasNext(i):
+        genre=it.next(i)
+        x=mp.get(mapa,genre)
+        entry=me.getValue(x)
+        eventos=mp.size(entry['events'])
+        mp.put(mapafinal,eventos,genre)
+        total+=eventos
+
+    numevents=mp.keySet(mapafinal)
+    ordered=mrge.sort(numevents,cmpnums)
+    i=it.newIterator(ordered)
+    n=1
     while it.hasNext(i):
         key=it.next(i)
-        x=mp.get(mapa,key)
-        entry=me.getValue(x)
-        unique=mp.size(entry['unique'])
-        uniques.append(unique)
-        total+=unique
-        tupla=unique,key
-        tuplas.append(tupla)
-    x=sorted(uniques,reverse=True)
+        par=mp.get(mapafinal,key)
+        value=me.getValue(par)
+        if n==1:
+            mayor=value
+        print('TOP '+str(n)+': '+value.capitalize()+' with '+str(key)+' reps')
+        n+=1
+
+
+
+"""    x=sorted(uniques,reverse=True)
     print('\nThere is a total of '+str(total)+' reproductions between '+str(minim)+' and '+str(maxim))
     print('========== GENRES SORTED REPRODUCTIONS ==========')
     i=1
@@ -265,7 +278,7 @@ def req5(catalog,minim,maxim):
                 m+=1
                 if m>10:
                     centinela=False
-    print('\n')
+    print('\n')"""
 
     stop_memory = getMemory()
     stop_time = getTime()
@@ -302,3 +315,6 @@ def deltaMemory(start_memory, stop_memory):
     # de Byte -> kByte
     delta_memory = delta_memory/1024.0
     return delta_memory
+
+def cmpnums(num1,num2):
+    return(num1>num2)
