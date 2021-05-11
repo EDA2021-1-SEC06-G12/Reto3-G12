@@ -77,11 +77,12 @@ while True:
 
         x=controller.loadData(cont)
         catalog=x[0]
+        eventos=catalog['eventos']
         tracks=catalog['hashtagsportrack']
 
-        print('\nSe cargaron '+str(x[1])+' eventos de escucha.')
+        print('\nSe cargaron '+str(lt.size(eventos))+' eventos de escucha.')
         print('Se cargaron '+str(mp.size(tracks))+' pistas de audio únicas.')
-        print('Se cargaron '+str(x[2])+' artistas únicos.\n')
+        print('Se cargaron '+str(x[1])+' artistas únicos.\n')
         print('Información de los 5 primeros eventos\n')
 
         n=1
