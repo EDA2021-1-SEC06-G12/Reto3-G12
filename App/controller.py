@@ -203,6 +203,13 @@ def req4(catalog,genre,minimo,maximo):
 
 
 def req5(catalog,minim,maxim):
+    delta_time = -1.0
+    delta_memory = -1.0
+
+    tracemalloc.start()
+    start_time = getTime()
+    start_memory = getMemory()
+
     mapa=mp.newMap(maptype="PROBING",loadfactor=0.5)
     total=0
     mayor=None
@@ -261,6 +268,15 @@ def req5(catalog,minim,maxim):
                 if m>10:
                     centinela=False
     print('\n')
+
+    stop_memory = getMemory()
+    stop_time = getTime()
+    tracemalloc.stop()
+
+    delta_time = stop_time - start_time
+    delta_memory = deltaMemory(start_memory, stop_memory)
+
+    return delta_time, delta_memory
 
 
 def getTime():

@@ -174,7 +174,10 @@ while True:
         y=input('Ingrese la hora máxima del rango [en formato H:MM:SS Ej: 0:00:00]: ')
         info1=datetime.datetime.strptime(y,'%H:%M:%S')
         time2=info1.time()
-        controller.req5(catalog,time1,time2)
+        x = controller.req5(catalog,time1,time2)
+        
+        print("\nTiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
+
         input('Presione enter para continuar')
 
 
