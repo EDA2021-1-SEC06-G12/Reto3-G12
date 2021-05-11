@@ -248,6 +248,30 @@ def req5(catalog,minim,maxim):
     print('========== '+mayor.upper()+' SENTIMENT ANALYSIS ==========')
     print(mayor.capitalize()+' has '+str(mp.size(x[1]))+' unique tracks')
 
+
+    listanums=lt.newList(datastructure='ARRAY_LIST')
+    llavesnums=(mp.keySet(mapanums))
+   
+    n = it.newIterator(llavesnums)
+    m=1
+    while it.hasNext(n):
+        num=it.next(n)
+        lt.addLast(listanums,num)
+    mergednums=mrge.sort(listanums,cmpnums)
+    centinela=True
+    d=it.newIterator(mergednums)
+    while it.hasNext(d) and centinela==True:
+        num=it.next(d)
+        par=mp.get(mapafinal,num)
+        listatuplas=me.getValue(par)
+        t=it.newIterator(listatuplas)
+        while it.hasNext(t) and centinela==True:
+            tupla=it.next(t)
+            print('TOP '+str(m)+' track: '+tupla[0]+' with '+str(num)+' hashtags and VADER = '+str(tupla[1]))
+            m+=1
+            if m>10:
+                centinela=False
+                
     print('\n')
 
 

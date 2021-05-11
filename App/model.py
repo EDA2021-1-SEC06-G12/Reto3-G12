@@ -309,14 +309,13 @@ def orderednums(catalog,tuplas):
         if prom!=None:
             num=prom[0]
             par=mp.get(mapafinal,num)
+            tup=(track,prom[1])
             if par!=None:
-                prome=prom[1]
-                tupla=track,prome
                 lista=me.getValue(par)
-                lt.addLast(lista,tupla)
+                lt.addLast(lista,tup)
             else:
                 lista=lt.newList(datastructure="ARRAY_LIST")
-                lt.addLast(lista,tupla)
+                lt.addLast(lista,tup)
                 mp.put(mapafinal,num,lista)
                 
     return mapafinal,tracksmap
