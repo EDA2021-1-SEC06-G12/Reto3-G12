@@ -292,10 +292,32 @@ def genresandtracks(lista):
 
     return mapa
 
-def entrygt(genre,tupla,track):
+def entrygt(genre,tupla):
     entry={'genre':genre,'events':mp.newMap()}
     mp.put(entry['events'],tupla,None)
     return entry
+
+def orderednums(tuplas):
+    mapafinal=mp.newMap()
+    i=it.newIterator(tuplas)
+    while it.hasNext(i):
+        tupla=it.next(i)
+        track=tupla[0]
+        prom=promedio(catalog,track)
+        if prom!=None:
+            num=prom[0]
+            par=om.get(mapafinal,num)
+            if par!=None:
+                prome=prom[1]
+                tupla=track,prome
+                lista=me.getValue(par)
+                lt.addLast(lista,tupla)
+            else:
+                lista=lt.newList(datastructure="ARRAY_LIST")
+                lt.addLast(lista,tupla)
+                om.put(mapafinal,num,lista)
+                
+    return mapafinal
 
 def numhts(tracks,catalog):
     mapafinal=om.newMap()
