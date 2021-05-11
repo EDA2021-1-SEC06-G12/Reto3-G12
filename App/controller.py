@@ -72,13 +72,11 @@ def loadData(catalog):
     input_file2 = csv.DictReader(open(file2, encoding="utf-8"),delimiter=",")
     
     artists=mp.newMap(numelements=11000)
-    x=1
     for event in input_file2:
-        x+=1
         model.addevent(catalog,event)
         mp.put(artists,event['artist_id'],None)
 
-    return catalog,x,mp.size(artists)
+    return catalog,mp.size(artists)
 
 def req1(menor,mayor,feature,catalog):
     delta_time = -1.0

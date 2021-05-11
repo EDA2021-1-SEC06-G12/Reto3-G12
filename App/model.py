@@ -46,8 +46,7 @@ def newCatalog():
     Retorna el analizador inicializado.
     """
     catalog = {'eventos':None,'energy':None,'instrumentalness':None,'danceability':None,'tempo':None,'acousticness':None,'hashtags':None,'time':None}
-    catalog['tracks']=mp.newMap(maptype="PROBING",loadfactor=0.5)
-    catalog['artists']=mp.newMap(maptype="PROBING",loadfactor=0.5)
+    catalog['eventos']=lt.newList(datastructure='ARRAY_LIST')
     catalog['energy']=om.newMap(omaptype="RBT")
     catalog['instrumentalness']=om.newMap(omaptype="RBT")
     catalog['danceability']=om.newMap(omaptype="RBT")
