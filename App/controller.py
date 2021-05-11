@@ -212,6 +212,7 @@ def req5(catalog,minim,maxim):
     mapafinal=mp.newMap()
     total=0
     mayor=None
+    mayorkey=0
     lista=om.values(catalog['time'],minim,maxim)
     mapa=model.genresandtracks(lista)
     genres=mp.keySet(mapa)
@@ -234,17 +235,41 @@ def req5(catalog,minim,maxim):
         value=me.getValue(par)
         if n==1:
             mayor=value
+            mayorkey=key
         print('TOP '+str(n)+': '+value.capitalize()+' with '+str(key)+' reps')
         n+=1
 
-    stop_memory = getMemory()
-    stop_time = getTime()
-    tracemalloc.stop()
+    pareja=mp.get(mapa,mayor)
+    entry=me.getValue(pareja)
+    tuplas=mp.keySet(entry['events'])
+    x=orderednums(tuplas)
+    mapanums=x[0]
+    print('\nThe TOP GENRE is '+mayor.capitalize()+' with '+str(mayorkey)+' reproductions')
+    print('========== '+mayor.upper()+' SENTIMENT ANALYSIS ==========')
+    print(mayor.capitalize()+' has '+str(mp.size(mapanums[1]))+' unique tracks')
 
-    delta_time = stop_time - start_time
-    delta_memory = deltaMemory(start_memory, stop_memory)
+    listanums=lt.newList(datastructure='ARRAY_LIST')
+    llavesnums=(om.keySet(mapanums))
+    m=1
+    while it.hasNext(n):
+        num=it.next(n)
+        lt.addLast(listanums,num)
 
-    return delta_time, delta_memory
+    mergednums=mrge.sort(listanums,cmpnums)
+    centinela=True
+    d=it.newIterator(mergednums)
+    while it.hasNext(d) and centinela==True:
+        num=it.next(d)
+        par=om.get(mapafinal,num)
+        listatuplas=me.getValue(par)
+        t=it.newIterator(listatuplas)
+        while it.hasNext(t) and centinela==True:
+            tupla=it.next(t)
+            print('TOP '+str(m)+' track: '+tupla[0]+' with '+str(num)+' hashtags and VADER = '+str(tupla[1]))
+            m+=1
+            if m>10:
+                centinela=False
+    print('\n')
 
 
 def getTime():

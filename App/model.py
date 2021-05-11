@@ -297,11 +297,37 @@ def entrygt(genre,tupla):
     mp.put(entry['events'],tupla,None)
     return entry
 
+def orderednums(tuplas):
+    mapafinal=mp.newMap()
+    tracksmap=mp.newMap()
+    i=it.newIterator(tuplas)
+    while it.hasNext(i):
+        tupla=it.next(i)
+        track=tupla[0]
+        mp.put(tracksmap,track)
+        prom=promedio(catalog,track)
+        if prom!=None:
+            num=prom[0]
+            par=om.get(mapafinal,num)
+            if par!=None:
+                prome=prom[1]
+                tupla=track,prome
+                lista=me.getValue(par)
+                lt.addLast(lista,tupla)
+            else:
+                lista=lt.newList(datastructure="ARRAY_LIST")
+                lt.addLast(lista,tupla)
+                om.put(mapafinal,num,lista)
+                
+    return mapafinal,tracksmap
+
 def numhts(tracks,catalog):
     mapafinal=om.newMap()
+    tracksmap=mp.newMap()
     d=it.newIterator(tracks)
     while it.hasNext(d):
         track=it.next(d)
+        mp.put(tracksmap,track)
         x=promedio(catalog,track)
         if x!=None:
             numht=x[0]
@@ -314,7 +340,7 @@ def numhts(tracks,catalog):
                 lista=lt.newList(datastructure="ARRAY_LIST")
                 lt.addLast(lista,(track,prom))
                 om.put(mapafinal,numht,lista)
-    return mapafinal
+    return mapafinal,tracksmap
 
 def tempobygenre(genre):
     if genre=='reggae':
