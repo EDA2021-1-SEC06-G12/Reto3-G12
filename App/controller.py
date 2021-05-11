@@ -242,14 +242,16 @@ def req5(catalog,minim,maxim):
     pareja=mp.get(mapa,mayor)
     entry=me.getValue(pareja)
     tuplas=mp.keySet(entry['events'])
-    x=orderednums(tuplas)
+    x=model.orderednums(catalog, tuplas)
     mapanums=x[0]
     print('\nThe TOP GENRE is '+mayor.capitalize()+' with '+str(mayorkey)+' reproductions')
     print('========== '+mayor.upper()+' SENTIMENT ANALYSIS ==========')
     print(mayor.capitalize()+' has '+str(mp.size(x[1]))+' unique tracks')
 
     listanums=lt.newList(datastructure='ARRAY_LIST')
-    llavesnums=(om.keySet(mapanums))
+    llavesnums=(mp.keySet(mapanums))
+   
+    n = it.newIterator(llavesnums)
     m=1
     while it.hasNext(n):
         num=it.next(n)
@@ -260,7 +262,7 @@ def req5(catalog,minim,maxim):
     d=it.newIterator(mergednums)
     while it.hasNext(d) and centinela==True:
         num=it.next(d)
-        par=om.get(mapafinal,num)
+        par=mp.get(mapafinal,num)
         listatuplas=me.getValue(par)
         t=it.newIterator(listatuplas)
         while it.hasNext(t) and centinela==True:

@@ -270,7 +270,7 @@ def genresbytempo(num):
     return genres
     
 def genresandtracks(lista):
-    mapa=mp.newMap()
+    mapa=mp.newMap(maptype="PROBING",loadfactor=0.5)
     i=it.newIterator(lista)
     while it.hasNext(i):
         events=it.next(i)
@@ -297,18 +297,18 @@ def entrygt(genre,tupla):
     mp.put(entry['events'],tupla,None)
     return entry
 
-def orderednums(tuplas):
-    mapafinal=mp.newMap()
-    tracksmap=mp.newMap()
+def orderednums(catalog,tuplas):
+    mapafinal=mp.newMap(maptype="PROBING",loadfactor=0.5)
+    tracksmap=mp.newMap(maptype="PROBING",loadfactor=0.5)
     i=it.newIterator(tuplas)
     while it.hasNext(i):
         tupla=it.next(i)
         track=tupla[0]
-        mp.put(tracksmap,track)
+        mp.put(tracksmap,track,None)
         prom=promedio(catalog,track)
         if prom!=None:
             num=prom[0]
-            par=om.get(mapafinal,num)
+            par=mp.get(mapafinal,num)
             if par!=None:
                 prome=prom[1]
                 tupla=track,prome
@@ -317,13 +317,13 @@ def orderednums(tuplas):
             else:
                 lista=lt.newList(datastructure="ARRAY_LIST")
                 lt.addLast(lista,tupla)
-                om.put(mapafinal,num,lista)
+                mp.put(mapafinal,num,lista)
                 
     return mapafinal,tracksmap
 
 def numhts(tracks,catalog):
-    mapafinal=om.newMap()
-    tracksmap=mp.newMap()
+    mapafinal=mp.newMap(maptype="PROBING",loadfactor=0.5)
+    tracksmap=mp.newMap(maptype="PROBING",loadfactor=0.5)
     d=it.newIterator(tracks)
     while it.hasNext(d):
         track=it.next(d)
@@ -332,14 +332,14 @@ def numhts(tracks,catalog):
         if x!=None:
             numht=x[0]
             prom=x[1]
-            par=om.get(mapafinal,numht)
+            par=mp.get(mapafinal,numht)
             if par!=None:
                 lista=me.getValue(par)
                 lt.addLast(lista,(track,prom))
             else:
                 lista=lt.newList(datastructure="ARRAY_LIST")
                 lt.addLast(lista,(track,prom))
-                om.put(mapafinal,numht,lista)
+                mp.put(mapafinal,numht,lista)
     return mapafinal,tracksmap
 
 def tempobygenre(genre):

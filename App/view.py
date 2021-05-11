@@ -68,12 +68,6 @@ while True:
         cont = controller.init()
 
     elif int(inputs[0]) == 2:
-        delta_time = -1.0
-        delta_memory = -1.0
-
-        tracemalloc.start()
-        start_time = controller.getTime()
-        start_memory = controller.getMemory()
 
         x=controller.loadData(cont)
         catalog=x[0]
@@ -99,14 +93,7 @@ while True:
             m+=1
             n+=1
         
-        stop_memory = controller.getMemory()
-        stop_time = controller.getTime()
-        tracemalloc.stop()
-
-        delta_time = stop_time - start_time
-        delta_memory = controller.deltaMemory(start_memory, stop_memory)
         
-        print("Tiempo [ms]: "+f"{delta_time:.3f}"+" ||  "+"Memoria [kB]: "+f"{delta_memory:.3f}"+'\n')
 
         input('Presione enter para continuar')
         
