@@ -273,6 +273,7 @@ def req5(catalog,minim,maxim):
                 centinela=False
 
     print('\n')
+    return delta_time, delta_memory
 
 
 def getTime():
