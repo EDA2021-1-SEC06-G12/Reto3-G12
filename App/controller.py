@@ -235,32 +235,34 @@ def req5(catalog,minim,maxim):
     pareja=mp.get(mapa,mayor)
     entry=me.getValue(pareja)
     tuplas=mp.keySet(entry['events'])
-    mapa=orderednums(tuplas)
+    x=orderednums(tuplas)
+    mapanums=x[0]
     print('\nThe TOP GENRE is '+mayor.capitalize()+' with '+str(mayorkey)+' reproductions')
-"""    print('========== '+mayor[1].upper()+' SENTIMENT ANALYSIS ==========')
-    print(mayor.capitalize()+' has '+str(mp.size())+' unique tracks')
+    print('========== '+mayor.upper()+' SENTIMENT ANALYSIS ==========')
+    print(mayor.capitalize()+' has '+str(mp.size(mapanums[1]))+' unique tracks')
 
-    llavesnumhts=(om.keySet(mapafinal))
-    n=it.newIterator(llavesnumhts)
-    listanum=[]
+    listanums=lt.newList(datastructure='ARRAY_LIST')
+    llavesnums=(om.keySet(mapanums))
     m=1
     while it.hasNext(n):
-        numht=it.next(n)
-        listanum.append(numht)
-    orderedlistanum=sorted(listanum,reverse=True)
+        num=it.next(n)
+        lt.addLast(listanums,num)
+
+    mergednums=mrge.sort(listanums,cmpnums)
     centinela=True
-    for num in orderedlistanum:
-        if centinela==True:
-            partuplas=om.get(mapafinal,num)
-            listatuplas=me.getValue(partuplas)
-            t=it.newIterator(listatuplas)
-            while it.hasNext(t) and centinela==True:
-                tupla=it.next(t)
-                print('TOP '+str(m)+' track: '+tupla[0]+' with '+str(num)+' hashtags and VADER = '+str(tupla[1]))
-                m+=1
-                if m>10:
-                    centinela=False
-    print('\n')"""
+    d=it.newIterator(mergednums)
+    while it.hasNext(d) and centinela==True:
+        num=it.next(d)
+        par=om.get(mapafinal,num)
+        listatuplas=me.getValue(par)
+        t=it.newIterator(listatuplas)
+        while it.hasNext(t) and centinela==True:
+            tupla=it.next(t)
+            print('TOP '+str(m)+' track: '+tupla[0]+' with '+str(num)+' hashtags and VADER = '+str(tupla[1]))
+            m+=1
+            if m>10:
+                centinela=False
+    print('\n')
 
 
 def getTime():
