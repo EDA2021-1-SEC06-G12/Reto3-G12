@@ -68,19 +68,20 @@ while True:
         cont = controller.init()
 
     elif int(inputs[0]) == 2:
-        catalog=controller.loadData(cont)
-        eventos=catalog['eventos']
-        tracks=mp.newMap(numelements=31000)
-        artists=mp.newMap(numelements=11000)
-        i=it.newIterator(eventos)
-        while it.hasNext(i):
-            event=it.next(i)
-            mp.put(tracks,event['track_id'],None)
-            mp.put(artists,event['artist_id'],None)
+        delta_time = -1.0
+        delta_memory = -1.0
 
-        print('\nSe cargaron '+str(lt.size(eventos))+' eventos de escucha.')
+        tracemalloc.start()
+        start_time = controller.getTime()
+        start_memory = controller.getMemory()
+
+        x=controller.loadData(cont)
+        catalog=x[0]
+        tracks=catalog['hashtagsportrack']
+
+        print('\nSe cargaron '+str(x[1])+' eventos de escucha.')
         print('Se cargaron '+str(mp.size(tracks))+' pistas de audio únicas.')
-        print('Se cargaron '+str(mp.size(artists))+' artistas únicos.\n')
+        print('Se cargaron '+str(x[2])+' artistas únicos.\n')
         print('Información de los 5 primeros eventos\n')
 
         n=1
@@ -96,6 +97,15 @@ while True:
             print('('+str(n)+') || track id: '+evento['track_id']+'|| artist id: '+evento['artist_id']+' || user id: '+evento['user_id']+' || instrumentalness: '+evento['instrumentalness']+' || liveness: '+evento['liveness']+' || speechiness: '+evento['speechiness']+' || danceability: '+evento['danceability']+' || valence: '+evento['valence']+' || loudness '+evento['loudness']+' || tempo: '+evento['tempo']+' || acousticness: '+evento['acousticness']+' || energy: '+evento['energy']+'\n')
             m+=1
             n+=1
+        
+        stop_memory = controller.getMemory()
+        stop_time = controller.getTime()
+        tracemalloc.stop()
+
+        delta_time = stop_time - start_time
+        delta_memory = controller.deltaMemory(start_memory, stop_memory)
+        print("Tiempo [ms]: "+f"{delta_time:.3f}"+" ||  "+"Memoria [kB]: "+f"{delta_memory:.3f}"+'\n')
+
         input('Presione enter para continuar')
         
     elif int(inputs[0])==3:

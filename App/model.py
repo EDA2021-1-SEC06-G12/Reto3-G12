@@ -46,7 +46,6 @@ def newCatalog():
     Retorna el analizador inicializado.
     """
     catalog = {'eventos':None,'energy':None,'instrumentalness':None,'danceability':None,'tempo':None,'acousticness':None,'hashtags':None,'time':None}
-    catalog['eventos']=lt.newList(datastructure="ARRAY_LIST")
     catalog['tracks']=mp.newMap(maptype="PROBING",loadfactor=0.5)
     catalog['artists']=mp.newMap(maptype="PROBING",loadfactor=0.5)
     catalog['energy']=om.newMap(omaptype="RBT")
@@ -68,15 +67,15 @@ def addhashtag(catalog,hashtag,vader):
     mp.put(mapa,hashtag,float(vader))
 
 def addevent(catalog,event):
-    lt.addLast(catalog['eventos'],event)
-    addtomap2(catalog["tempo"],event,"tempo")
-    addtomap2(catalog["energy"],event,"energy")
-    addtomap2(catalog["instrumentalness"], event, "instrumentalness")
-    addtomap2(catalog["danceability"],event,"danceability")
-    addtomap2(catalog["acousticness"],event,"acousticness")
-    addtomap2(catalog["liveness"],event,"liveness")
-    addtomap2(catalog["speechiness"],event,"speechiness")
-    addtomap2(catalog["valence"],event,"valence")
+    tupla=(event['track_id'],event['user_id'],event['created_at'])
+    addtomap2(catalog["tempo"],event,tupla,"tempo")
+    addtomap2(catalog["energy"],event,tupla,"energy")
+    addtomap2(catalog["instrumentalness"], event,tupla,"instrumentalness")
+    addtomap2(catalog["danceability"],event,tupla,"danceability")
+    addtomap1(catalog["acousticness"],event,tupla,"acousticness")
+    addtomap1(catalog["liveness"],event,tupla,"liveness")
+    addtomap1(catalog["speechiness"],event,tupla,"speechiness")
+    addtomap1(catalog["valence"],event,tupla,"valence")
     addtime(catalog['time'],event)
 
 def addtime(mapa,event):
@@ -87,7 +86,7 @@ def addtime(mapa,event):
         lista=me.getValue(pareja)
         lt.addLast(lista,entrytime(event))
     else:
-        lista=lt.newList(datastructure="ARRAY_LIST")
+        lista=lt.newList()
         lt.addLast(lista,entrytime(event))
         om.put(mapa,time,lista)
 
@@ -96,8 +95,28 @@ def entrytime(event):
     return entry
 
 
-def addtomap2(mapa,event,caract):
-    tupla=(event['track_id'],event['user_id'],event['created_at'])
+def addtomap1(mapa,event,tupla,caract):
+    llave=event[caract]
+    if om.contains(mapa,llave):
+        pareja=om.get(mapa,llave)
+        entry = pareja["value"]
+        mp.put(entry["events"],tupla,None)
+        mp.put(entry["artists"],event['artist_id'],None)
+        
+    else:
+        entry=entrada1(llave,tupla,event['artist_id'])
+        om.put(mapa,llave,entry)
+
+def entrada1(llave,tupla,artist):
+    entry = {"llave":llave,"events":None,"artists":None}
+    entry["events"] =mp.newMap()
+    mp.put(entry["events"], tupla,None)
+    entry["artists"] = mp.newMap()
+    mp.put(entry["artists"],artist,None)
+    return entry
+
+
+def addtomap2(mapa,event,tupla,caract):
     llave = float(event[caract])
     if caract=='danceability':
             val=(event['energy'],event['danceability'])
