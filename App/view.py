@@ -105,6 +105,7 @@ while True:
 
         delta_time = stop_time - start_time
         delta_memory = controller.deltaMemory(start_memory, stop_memory)
+        
         print("Tiempo [ms]: "+f"{delta_time:.3f}"+" ||  "+"Memoria [kB]: "+f"{delta_memory:.3f}"+'\n')
 
         input('Presione enter para continuar')
@@ -176,7 +177,7 @@ while True:
         info1=datetime.datetime.strptime(y,'%H:%M:%S')
         time2=info1.time()
         x = controller.req5(catalog,time1,time2)
-        
+
         print("\nTiempo [ms]: "+f"{x[0]:.3f}"+" ||  "+"Memoria [kB]: "+f"{x[1]:.3f}"+'\n')
 
         input('Presione enter para continuar')

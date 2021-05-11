@@ -237,49 +237,6 @@ def req5(catalog,minim,maxim):
         print('TOP '+str(n)+': '+value.capitalize()+' with '+str(key)+' reps')
         n+=1
 
-
-
-"""    x=sorted(uniques,reverse=True)
-    print('\nThere is a total of '+str(total)+' reproductions between '+str(minim)+' and '+str(maxim))
-    print('========== GENRES SORTED REPRODUCTIONS ==========')
-    i=1
-    for num in x:
-        for tupla in tuplas:
-            if tupla[0]==num:
-                print('TOP '+str(i)+': '+tupla[1].capitalize()+' with '+str(num)+' reps')
-                if i==1:
-                    mayor=tupla
-                i+=1
-    pareja=mp.get(mapa,mayor[1])
-    entry=me.getValue(pareja)
-    tracks=mp.keySet(entry['tracks'])
-    print('\nThe TOP GENRE is '+mayor[1].capitalize()+' with '+str(mayor[0])+' reproductions')
-    print('========== '+mayor[1].upper()+' SENTIMENT ANALYSIS ==========')
-    print(mayor[1].capitalize()+' has '+str(lt.size(tracks))+' unique tracks')
-
-    mapafinal=model.numhts(tracks,catalog)
-    llavesnumhts=(om.keySet(mapafinal))
-    n=it.newIterator(llavesnumhts)
-    listanum=[]
-    m=1
-    while it.hasNext(n):
-        numht=it.next(n)
-        listanum.append(numht)
-    orderedlistanum=sorted(listanum,reverse=True)
-    centinela=True
-    for num in orderedlistanum:
-        if centinela==True:
-            partuplas=om.get(mapafinal,num)
-            listatuplas=me.getValue(partuplas)
-            t=it.newIterator(listatuplas)
-            while it.hasNext(t) and centinela==True:
-                tupla=it.next(t)
-                print('TOP '+str(m)+' track: '+tupla[0]+' with '+str(num)+' hashtags and VADER = '+str(tupla[1]))
-                m+=1
-                if m>10:
-                    centinela=False
-    print('\n')"""
-
     stop_memory = getMemory()
     stop_time = getTime()
     tracemalloc.stop()

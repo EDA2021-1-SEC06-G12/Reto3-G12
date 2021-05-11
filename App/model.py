@@ -292,7 +292,7 @@ def genresandtracks(lista):
 
     return mapa
 
-def entrygt(genre,tupla,track):
+def entrygt(genre,tupla):
     entry={'genre':genre,'events':mp.newMap()}
     mp.put(entry['events'],tupla,None)
     return entry
