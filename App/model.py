@@ -67,6 +67,7 @@ def addhashtag(catalog,hashtag,vader):
 
 def addevent(catalog,event):
     tupla=(event['track_id'],event['user_id'],event['created_at'])
+    lt.addLast(catalog['eventos'],event)
     addtomap2(catalog["tempo"],event,tupla,"tempo")
     addtomap2(catalog["energy"],event,tupla,"energy")
     addtomap2(catalog["instrumentalness"], event,tupla,"instrumentalness")
