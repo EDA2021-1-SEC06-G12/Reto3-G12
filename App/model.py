@@ -99,7 +99,7 @@ def entrytime(event):
 
 
 def addtomap1(mapa,event,tupla,caract):
-    llave=event[caract]
+    llave=float(event[caract])
     if om.contains(mapa,llave):
         pareja=om.get(mapa,llave)
         entry = pareja["value"]
