@@ -213,6 +213,7 @@ def tracksencomun(mapa,listadeentries):
                     val=me.getValue(par)
                     valor=(track,val)
                     lt.addLast(cinco,valor)
+                    x+=1
                 lt.addLast(lista,track)
 
     return lt.size(lista),cinco
