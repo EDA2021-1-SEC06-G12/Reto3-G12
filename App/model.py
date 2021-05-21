@@ -197,6 +197,7 @@ def mapaeventos(listadeentries):
 
 def tracksencomun(mapa,listadeentries):
     lista=lt.newList(datastructure="ARRAY_LIST")
+    cinco=lt.newList(datastructure="ARRAY_LIST")
     x=1
     i=it.newIterator(listadeentries)
     while it.hasNext(i):
@@ -211,11 +212,10 @@ def tracksencomun(mapa,listadeentries):
                     par=mp.get(mapatracks,track)
                     val=me.getValue(par)
                     valor=(track,val)
-                else:
-                    valor=track
-                lt.addLast(lista,valor)
+                    lt.addLast(cinco,valor)
+                lt.addLast(lista,track)
 
-    return lt.size(lista),lt.subList(lista,1,5)
+    return lt.size(lista),cinco
 
 def artists(lista,x):
     m=1
